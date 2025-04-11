@@ -39,12 +39,38 @@ namespace TP.ConcurrentProgramming.Data
       NewPositionNotification?.Invoke(this, Position);
     }
 
-    internal void Move(Vector delta)
-    {
-      Position = new Vector(Position.x + delta.x, Position.y + delta.y);
-      RaiseNewPositionChangeNotification();
-    }
+        //internal void Move(Vector delta)
+        //{
+        //  Position = new Vector(Position.x + delta.x, Position.y + delta.y);
+        //  RaiseNewPositionChangeNotification();
+        //}
 
-    #endregion private
-  }
+        // Add boundary constraints to ensure the ball does not move outside the table dimensions.
+        internal void Move(Vector delta, double tableWidth, double tableHeight, double radius)
+        {
+            // Calculate the new position
+            double newX = Position.x + delta.x;
+            double newY = Position.y + delta.y;
+
+            // Check horizontal bounds
+            if (newX < radius || newX > tableWidth - radius)
+            {
+                newX = Math.Clamp(newX, radius, tableWidth - radius);
+                Velocity = new Vector(-Velocity.x, Velocity.y); // Reverse X velocity
+            }
+
+            // Check vertical bounds
+            if (newY < radius || newY > tableHeight - radius)
+            {
+                newY = Math.Clamp(newY, radius, tableHeight - radius);
+                Velocity = new Vector(Velocity.x, -Velocity.y); // Reverse Y velocity
+            }
+
+            // Update position
+            Position = new Vector(newX, newY);
+            RaiseNewPositionChangeNotification();
+        }
+
+        #endregion private
+    }
 }
