@@ -31,7 +31,7 @@ namespace TP.ConcurrentProgramming.PresentationView
 
     private void StartButton_Click(object sender, RoutedEventArgs e)
     {
-        if (int.TryParse(BallCountTextBox.Text, out int ballCount) && ballCount > 0 && ballCount < 20)
+        if (int.TryParse(BallCountTextBox.Text, out int ballCount) && ballCount > 0 && ballCount <= 50)
         {
             MainWindowViewModel viewModel = (MainWindowViewModel)DataContext;
             double screenWidth = SystemParameters.PrimaryScreenWidth;

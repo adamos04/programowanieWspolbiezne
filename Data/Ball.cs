@@ -51,28 +51,37 @@ namespace TP.ConcurrentProgramming.Data
         //}
 
         // Add boundary constraints to ensure the ball does not move outside the table dimensions.
-        internal void Move(Vector delta, double tableWidth, double tableHeight, double radius)
+        internal void Move(Vector delta, double radius)
         {
-            // Calculate the new position
+            // Calculate new center position
             double newX = Position.x + delta.x;
             double newY = Position.y + delta.y;
-            double diameter = radius * 2;
 
-            // Check horizontal bounds
-            if (newX < 0 || newX + diameter > _tableWidth)
+            // Check horizontal bounds (left and right)
+            if (newX < 0)
             {
-                newX = Math.Clamp(newX, 0, _tableWidth - diameter);
-                Velocity = new Vector(-Velocity.x, Velocity.y); // Reverse X velocity
+                newX = 0;
+                Velocity = new Vector(-Velocity.x, Velocity.y);
+            }
+            else if (newX + radius > _tableWidth)
+            {
+                newX = _tableWidth - radius;
+                Velocity = new Vector(-Velocity.x, Velocity.y);
             }
 
-            // Check vertical bounds
-            if (newY < 0 || newY + diameter > _tableHeight)
+            // Check vertical bounds (top and bottom)
+            if (newY < 0)
             {
-                newY = Math.Clamp(newY, 0, _tableHeight - diameter);
-                Velocity = new Vector(Velocity.x, -Velocity.y); // Reverse Y velocity
+                newY = 0;
+                Velocity = new Vector(Velocity.x, -Velocity.y);
+            }
+            else if (newY + radius > _tableHeight)
+            {
+                newY = _tableHeight - radius;
+                Velocity = new Vector(Velocity.x, -Velocity.y);
             }
 
-            // Update position
+            // Update position (center)
             Position = new Vector(newX, newY);
             RaiseNewPositionChangeNotification();
         }
