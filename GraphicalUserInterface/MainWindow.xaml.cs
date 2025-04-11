@@ -36,7 +36,8 @@ namespace TP.ConcurrentProgramming.PresentationView
             MainWindowViewModel viewModel = (MainWindowViewModel)DataContext;
             double screenWidth = SystemParameters.PrimaryScreenWidth;
             double screenHeight = SystemParameters.PrimaryScreenHeight;
-            viewModel.Start(ballCount);
+                SetDynamicTableSize();
+                viewModel.Start(ballCount, _tableWidth, _tableHeight);
 
             BallCountTextBox.Visibility = Visibility.Collapsed;
             ((Button)sender).Visibility = Visibility.Collapsed;
@@ -58,5 +59,20 @@ namespace TP.ConcurrentProgramming.PresentationView
         viewModel.Dispose();
       base.OnClosed(e);
     }
-  }
+
+    private double _tableWidth;
+    private double _tableHeight;
+
+    private void SetDynamicTableSize()
+    {
+        double screenWidth = SystemParameters.PrimaryScreenWidth;
+        double screenHeight = SystemParameters.PrimaryScreenHeight;
+
+        _tableWidth = screenWidth * 0.7;
+        _tableHeight = screenHeight * 0.7;
+
+        GameTableBorder.Width = _tableWidth;
+        GameTableBorder.Height = _tableHeight;
+    }
+    }
 }

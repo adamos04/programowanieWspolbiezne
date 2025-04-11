@@ -12,13 +12,18 @@ namespace TP.ConcurrentProgramming.Data
 {
   internal class Ball : IBall
   {
-    #region ctor
+        #region ctor
 
-    internal Ball(Vector initialPosition, Vector initialVelocity)
+        private readonly double _tableWidth;
+        private readonly double _tableHeight;
+
+        internal Ball(Vector initialPosition, Vector initialVelocity, double tableWidth, double tableHeight)
     {
       Position = initialPosition;
       Velocity = initialVelocity;
-    }
+      _tableWidth = tableWidth;
+      _tableHeight = tableHeight;
+        }
 
     #endregion ctor
 
@@ -53,16 +58,16 @@ namespace TP.ConcurrentProgramming.Data
             double newY = Position.y + delta.y;
 
             // Check horizontal bounds
-            if (newX < radius || newX > tableWidth - radius)
+            if (newX < radius || newX > _tableWidth - radius)
             {
-                newX = Math.Clamp(newX, radius, tableWidth - radius);
+                newX = Math.Clamp(newX, radius, _tableWidth - radius);
                 Velocity = new Vector(-Velocity.x, Velocity.y); // Reverse X velocity
             }
 
             // Check vertical bounds
-            if (newY < radius || newY > tableHeight - radius)
+            if (newY < radius || newY > _tableHeight - radius)
             {
-                newY = Math.Clamp(newY, radius, tableHeight - radius);
+                newY = Math.Clamp(newY, radius, _tableHeight - radius);
                 Velocity = new Vector(Velocity.x, -Velocity.y); // Reverse Y velocity
             }
 
