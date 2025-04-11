@@ -56,18 +56,19 @@ namespace TP.ConcurrentProgramming.Data
             // Calculate the new position
             double newX = Position.x + delta.x;
             double newY = Position.y + delta.y;
+            double diameter = radius * 2;
 
             // Check horizontal bounds
-            if (newX < radius || newX > _tableWidth - radius)
+            if (newX < 0 || newX + diameter > _tableWidth)
             {
-                newX = Math.Clamp(newX, radius, _tableWidth - radius);
+                newX = Math.Clamp(newX, 0, _tableWidth - diameter);
                 Velocity = new Vector(-Velocity.x, Velocity.y); // Reverse X velocity
             }
 
             // Check vertical bounds
-            if (newY < radius || newY > _tableHeight - radius)
+            if (newY < 0 || newY + diameter > _tableHeight)
             {
-                newY = Math.Clamp(newY, radius, _tableHeight - radius);
+                newY = Math.Clamp(newY, 0, _tableHeight - diameter);
                 Velocity = new Vector(Velocity.x, -Velocity.y); // Reverse Y velocity
             }
 
