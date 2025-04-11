@@ -9,6 +9,7 @@
 
 using System;
 using System.Windows;
+using System.Windows.Controls;
 using TP.ConcurrentProgramming.Presentation.ViewModel;
 
 namespace TP.ConcurrentProgramming.PresentationView
@@ -22,11 +23,30 @@ namespace TP.ConcurrentProgramming.PresentationView
     {
       Random random = new Random();
       InitializeComponent();
+      //MainWindowViewModel viewModel = (MainWindowViewModel)DataContext;
+      //double screenWidth = SystemParameters.PrimaryScreenWidth;
+      //double screenHeight = SystemParameters.PrimaryScreenHeight;
+      //viewModel.Start(random.Next(5, 10));
+    }
+
+    private void StartButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (int.TryParse(BallCountTextBox.Text, out int ballCount) && ballCount > 0 && ballCount < 20)
+        {
             MainWindowViewModel viewModel = (MainWindowViewModel)DataContext;
             double screenWidth = SystemParameters.PrimaryScreenWidth;
             double screenHeight = SystemParameters.PrimaryScreenHeight;
-            viewModel.Start(random.Next(5, 10));
+            viewModel.Start(ballCount);
+
+            BallCountTextBox.Visibility = Visibility.Collapsed;
+            ((Button)sender).Visibility = Visibility.Collapsed;
+            BallCountTextBlock.Visibility = Visibility.Collapsed;
         }
+        else
+        {
+            MessageBox.Show("Proszę wprowadzić prawidłową liczbę piłek.");
+        }
+    }
 
         /// <summary>
         /// Raises the <seealso cref="System.Windows.Window.Closed"/> event.
