@@ -81,6 +81,17 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
         }
     }
 
+    private bool _isStartEnabled = true;
+    public bool IsStartEnabled
+    {
+        get => _isStartEnabled;
+        set
+        {
+            _isStartEnabled = value;
+            RaisePropertyChanged(nameof(IsStartEnabled));
+        }
+    }
+
         private void StartMethod()
         {
             if (int.TryParse(BallInput, out int numberOfBalls) && numberOfBalls >= 1 && numberOfBalls <= 50)
@@ -88,6 +99,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
                 TableWidth = ScreenSize.Width * 0.7;
                 TableHeight = ScreenSize.Height * 0.7;
                 Start(numberOfBalls, TableWidth, TableHeight);
+                IsStartEnabled = false;
             }
             else
             {
