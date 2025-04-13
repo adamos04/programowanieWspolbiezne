@@ -6,19 +6,26 @@
         xmlns:vm="clr-namespace:TP.ConcurrentProgramming.Presentation.ViewModel;assembly=TP.ConcurrentProgramming.PresentationViewModel"
         mc:Ignorable="d"
         Title="Presentation layer targeting reactive behaviour" Height="auto" Width="auto">
+    <Window.Resources>
+        <vm:ScreenSizeProxy x:Key="ScreenSize"/>
+    </Window.Resources>
     <Window.DataContext>
-        <vm:MainWindowViewModel />
+        <vm:MainWindowViewModel ScreenSize="{StaticResource ScreenSize}" />
     </Window.DataContext>
+
 
     <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center" Margin="10">
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20">
             <TextBlock x:Name="BallCountTextBlock" Text="Ilość kulek (1 - 50):" VerticalAlignment="Center" Margin="0,0,10,0"/>
-            <TextBox Width="50" x:Name="BallCountTextBox" VerticalAlignment="Center" Margin="0,0,10,0"/>
-            <Button Content="Start" Click="StartButton_Click" VerticalAlignment="Center"/>
+                    <TextBox Width="50"
+                 Text="{Binding BallInput, UpdateSourceTrigger=PropertyChanged}"
+                 VerticalAlignment="Center"
+                 Margin="0,0,10,0"/>
+            <Button Content="Start" Command="{Binding StartCommand}" VerticalAlignment="Center"/>
         </StackPanel>
 
-        <Border x:Name="GameTableBorder" BorderThickness="4" BorderBrush="Green">
+        <Border x:Name="GameTableBorder" BorderThickness="4" BorderBrush="Green" Width="{Binding TableWidth}" Height="{Binding TableHeight}">
             <ItemsControl ItemsSource="{Binding Balls}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -27,7 +34,7 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Ellipse Width= "{Binding Diameter}" Height="{Binding Diameter}" Fill="Blue" />
+                            <Ellipse Width="{Binding Diameter}" Height="{Binding Diameter}" Fill="Blue" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                     <ItemsControl.ItemContainerStyle>

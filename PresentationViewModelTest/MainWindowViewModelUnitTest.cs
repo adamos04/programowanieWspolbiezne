@@ -24,14 +24,15 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
     public void ConstructorTest()
     {
       ModelNullFixture nullModelFixture = new();
+      ScreenSizeProxy screenSize = new ScreenSizeProxy();
       Assert.AreEqual<int>(0, nullModelFixture.Disposed);
       Assert.AreEqual<int>(0, nullModelFixture.Started);
       Assert.AreEqual<int>(0, nullModelFixture.Subscribed);
-      using (MainWindowViewModel viewModel = new(nullModelFixture))
+      using (MainWindowViewModel viewModel = new(nullModelFixture, screenSize))
       {
         Random random = new Random();
         int numberOfBalls = random.Next(1, 10);
-        viewModel.Start(numberOfBalls);
+        viewModel.Start(numberOfBalls, 200, 200);
         Assert.IsNotNull(viewModel.Balls);
         Assert.AreEqual<int>(0, nullModelFixture.Disposed);
         Assert.AreEqual<int>(numberOfBalls, nullModelFixture.Started);
@@ -44,12 +45,13 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
     public void BehaviorTestMethod()
     {
       ModelSimulatorFixture modelSimulator = new();
-      MainWindowViewModel viewModel = new(modelSimulator);
+      ScreenSizeProxy screenSize = new ScreenSizeProxy();
+      MainWindowViewModel viewModel = new(modelSimulator, screenSize);
       Assert.IsNotNull(viewModel.Balls);
       Assert.AreEqual<int>(0, viewModel.Balls.Count);
       Random random = new Random();
       int numberOfBalls = random.Next(1, 10);
-      viewModel.Start(numberOfBalls);
+      viewModel.Start(numberOfBalls, 200, 200);
       Assert.AreEqual<int>(numberOfBalls, viewModel.Balls.Count);
       viewModel.Dispose();
       Assert.IsTrue(modelSimulator.Disposed);
@@ -65,19 +67,23 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
       internal int Disposed = 0;
       internal int Started = 0;
       internal int Subscribed = 0;
+      internal double Width = 0;
+      internal double Height = 0;
 
-      #endregion Test
+            #endregion Test
 
-      #region ModelAbstractApi
+            #region ModelAbstractApi
 
-      public override void Dispose()
+            public override void Dispose()
       {
         Disposed++;
       }
 
-      public override void Start(int numberOfBalls)
+      public override void Start(int numberOfBalls, double tableWidth, double tableHeight)
       {
         Started = numberOfBalls;
+        Width = tableWidth;
+        Height = tableHeight;
       }
 
       public override IDisposable Subscribe(IObserver<ModelIBall> observer)
@@ -123,7 +129,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
         return eventObservable?.Subscribe(x => observer.OnNext(x.EventArgs.Ball), ex => observer.OnError(ex), () => observer.OnCompleted());
       }
 
-      public override void Start(int numberOfBalls)
+      public override void Start(int numberOfBalls, double tableWidth, double tableHeight)
       {
         for (int i = 0; i < numberOfBalls; i++)
         {

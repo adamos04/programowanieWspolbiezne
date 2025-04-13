@@ -9,6 +9,7 @@
 
 using System;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 using TP.ConcurrentProgramming.Presentation.Model;
 using TP.ConcurrentProgramming.Presentation.ViewModel.MVVMLight;
 using ModelIBall = TP.ConcurrentProgramming.Presentation.Model.IBall;
@@ -19,20 +20,21 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
   {
     #region ctor
 
-    public MainWindowViewModel() : this(null)
-    { }
+    public MainWindowViewModel() : this(null, null) { }
 
-    internal MainWindowViewModel(ModelAbstractApi modelLayerAPI)
+    public MainWindowViewModel(ModelAbstractApi modelLayerAPI, ScreenSizeProxy screenSize)
     {
-      ModelLayer = modelLayerAPI == null ? ModelAbstractApi.CreateModel() : modelLayerAPI;
-      Observer = ModelLayer.Subscribe<ModelIBall>(x => Balls.Add(x));
+        ModelLayer = modelLayerAPI == null ? ModelAbstractApi.CreateModel() : modelLayerAPI;
+        Observer = ModelLayer.Subscribe<ModelIBall>(x => Balls.Add(x));
+        StartCommand = new RelayCommand(StartMethod);
+        ScreenSize = screenSize;
     }
 
-    #endregion ctor
+        #endregion ctor
 
-    #region public API
+        #region public API
 
-    public void Start(int numberOfBalls, double tableWidth, double tableHeight)
+        public void Start(int numberOfBalls, double tableWidth, double tableHeight)
     {
       if (Disposed)
         throw new ObjectDisposedException(nameof(MainWindowViewModel));
@@ -40,13 +42,64 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
       Observer.Dispose();
     }
 
+    public ICommand StartCommand { get; }
     public ObservableCollection<ModelIBall> Balls { get; } = new ObservableCollection<ModelIBall>();
 
-    #endregion public API
+    public ScreenSizeProxy ScreenSize { get; set; }
 
-    #region IDisposable
+    private string _ballInput;
+    public string BallInput
+    {
+        get => _ballInput;
+        set
+        {
+            _ballInput = value;
+            RaisePropertyChanged(nameof(BallInput));
+        }
+    }
 
-    protected virtual void Dispose(bool disposing)
+    private double _tableWidth;
+    private double _tableHeight;
+
+    public double TableWidth
+    {
+        get => _tableWidth;
+        private set
+        {
+            _tableWidth = value;
+            RaisePropertyChanged(nameof(TableWidth));
+        }
+    }
+
+    public double TableHeight
+    {
+        get => _tableHeight;
+        private set
+        {
+            _tableHeight = value;
+            RaisePropertyChanged(nameof(TableHeight));
+        }
+    }
+
+        private void StartMethod()
+        {
+            if (int.TryParse(BallInput, out int numberOfBalls) && numberOfBalls >= 1 && numberOfBalls <= 50)
+            {
+                TableWidth = ScreenSize.Width * 0.7;
+                TableHeight = ScreenSize.Height * 0.7;
+                Start(numberOfBalls, TableWidth, TableHeight);
+            }
+            else
+            {
+                //MessageBox.Show("Proszę wprowadzić prawidłową liczbę piłek (1-50).");
+            }
+        }
+
+        #endregion public API
+
+        #region IDisposable
+
+        protected virtual void Dispose(bool disposing)
     {
       if (!Disposed)
       {
