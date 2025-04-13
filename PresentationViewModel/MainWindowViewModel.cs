@@ -55,6 +55,11 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
         {
             _ballInput = value;
             RaisePropertyChanged(nameof(BallInput));
+
+            if (int.TryParse(_ballInput, out int num) && num >= 1 && num <= 15)
+                IsBallInputValid = true;
+            else
+                IsBallInputValid = false;
         }
     }
 
@@ -92,10 +97,22 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
         }
     }
 
+    private bool _isBallInputValid = true;
+    public bool IsBallInputValid
+    {
+        get => _isBallInputValid;
+        set
+        {
+            _isBallInputValid = value;
+            RaisePropertyChanged(nameof(IsBallInputValid));
+        }
+    }
+
         private void StartMethod()
         {
-            if (int.TryParse(BallInput, out int numberOfBalls) && numberOfBalls >= 1 && numberOfBalls <= 50)
+            if (int.TryParse(BallInput, out int numberOfBalls) && numberOfBalls >= 1 && numberOfBalls <= 15)
             {
+                IsBallInputValid = true;
                 TableWidth = ScreenSize.Width * 0.7;
                 TableHeight = ScreenSize.Height * 0.7;
                 Start(numberOfBalls, TableWidth, TableHeight);
@@ -103,7 +120,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
             }
             else
             {
-                //MessageBox.Show("Proszę wprowadzić prawidłową liczbę piłek (1-50).");
+                IsBallInputValid = false;
             }
         }
 

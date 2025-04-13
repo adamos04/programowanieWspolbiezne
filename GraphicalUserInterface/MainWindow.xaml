@@ -18,11 +18,23 @@
     <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center" Margin="10">
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20">
-            <TextBlock x:Name="BallCountTextBlock" Text="Ilość kulek (1 - 50):" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBox Width="50"
+            <TextBlock x:Name="BallCountTextBlock" Text="Ilość kulek (1 - 15):" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <TextBox Width="50"
                  Text="{Binding BallInput, UpdateSourceTrigger=PropertyChanged}"
                  VerticalAlignment="Center"
-                 Margin="0,0,10,0"/>
+                 Margin="0,0,10,0">
+                             <TextBox.Style>
+                <Style TargetType="TextBox">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsBallInputValid}" Value="False">
+                            <Setter Property="BorderBrush" Value="Red"/>
+                            <Setter Property="BorderThickness" Value="2"/>
+                            <Setter Property="Background" Value="#FFF8E5E5"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+                </TextBox.Style>
+            </TextBox>
             <Button Content="Start" Command="{Binding StartCommand}" IsEnabled="{Binding IsStartEnabled}" VerticalAlignment="Center"/>
         </StackPanel>
 
