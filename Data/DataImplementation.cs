@@ -19,7 +19,7 @@ namespace TP.ConcurrentProgramming.Data
 
     public DataImplementation()
     {
-      MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(50));
+      MoveTimer = new Timer(Move, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(16));
     }
 
     #endregion ctor
@@ -85,18 +85,24 @@ namespace TP.ConcurrentProgramming.Data
     private Random RandomGenerator = new();
     private List<Ball> BallsList = [];
 
-    private void Move(object? x)
-    {
-      foreach (Ball item in BallsList)
-                //item.Move(new Vector((RandomGenerator.NextDouble() - 0.5) * 10, (RandomGenerator.NextDouble() - 0.5) * 10), 400, 420,25);
-                item.Move((Vector)item.Velocity, 28);
+        private readonly object _lock = new();
+
+        private void Move(object? x)
+        {
+            lock (_lock)
+            {
+                foreach (Ball item in BallsList)
+                {
+                    item.Move((Vector)item.Velocity, 28);
+                }
+            }
         }
 
-    #endregion private
+        #endregion private
 
-    #region TestingInfrastructure
+        #region TestingInfrastructure
 
-    [Conditional("DEBUG")]
+        [Conditional("DEBUG")]
     internal void CheckBallsList(Action<IEnumerable<IBall>> returnBallsList)
     {
       returnBallsList(BallsList);

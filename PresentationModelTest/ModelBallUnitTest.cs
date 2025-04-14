@@ -50,6 +50,10 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
       {
         throw new NotImplementedException();
       }
+        public void TriggerNewPositionNotification(IPosition position)
+        {
+            NewPositionNotification?.Invoke(this, position);
+        }
     }
 
     #endregion testing instrumentation
