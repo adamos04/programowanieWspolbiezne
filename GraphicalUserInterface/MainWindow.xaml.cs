@@ -26,8 +26,8 @@ namespace TP.ConcurrentProgramming.PresentationView
         {
             screenSize.Width = SystemParameters.PrimaryScreenWidth;
             screenSize.Height = SystemParameters.PrimaryScreenHeight;
-}
         }
+    }
 
  
 

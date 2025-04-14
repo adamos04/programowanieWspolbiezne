@@ -91,7 +91,8 @@ namespace TP.ConcurrentProgramming.Data
         {
             lock (_lock)
             {
-                foreach (Ball item in BallsList)
+                var ballsCopy = BallsList.ToList();
+                foreach (Ball item in ballsCopy)
                 {
                     item.Move((Vector)item.Velocity, 28);
                 }
