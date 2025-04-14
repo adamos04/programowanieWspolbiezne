@@ -22,7 +22,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel
 
     public MainWindowViewModel() : this(null, null) { }
 
-    public MainWindowViewModel(ModelAbstractApi modelLayerAPI, ScreenSizeProxy screenSize)
+    internal MainWindowViewModel(ModelAbstractApi modelLayerAPI, ScreenSizeProxy screenSize)
     {
         ModelLayer = modelLayerAPI == null ? ModelAbstractApi.CreateModel() : modelLayerAPI;
         Observer = ModelLayer.Subscribe<ModelIBall>(x => Balls.Add(x));
