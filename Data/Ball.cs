@@ -10,82 +10,93 @@
 
 namespace TP.ConcurrentProgramming.Data
 {
-  internal class Ball : IBall
-  {
+    internal class Ball : IBall
+    {
         #region ctor
+        internal Ball(Vector initialPosition, Vector initialVelocity, double tableWidth, double tableHeight, double radius)
+        {
+            _position = initialPosition;
+            Velocity = initialVelocity;
+            _tableWidth = tableWidth;
+            _tableHeight = tableHeight;
+            Mass = new Random().NextDouble() * 5 + double.Epsilon;
+            Radius = radius; // Promień przekazywany jako parametr
+        }
+        #endregion
 
+        #region IBall
+        public event EventHandler<IVector>? NewPositionNotification;
+        public IVector Velocity { get; set; }
+        public double Mass { get; }
+        public double Radius { get; }
+        #endregion
+
+        #region public
+        public IVector Position => _position;
+        #endregion
+
+        #region private
         private readonly double _tableWidth;
         private readonly double _tableHeight;
+        private Vector _position;
 
-        internal Ball(Vector initialPosition, Vector initialVelocity, double tableWidth, double tableHeight)
-    {
-      Position = initialPosition;
-      Velocity = initialVelocity;
-      _tableWidth = tableWidth;
-      _tableHeight = tableHeight;
+        private void RaiseNewPositionChangeNotification()
+        {
+            NewPositionNotification?.Invoke(this, _position);
         }
 
-    #endregion ctor
-
-    #region IBall
-
-    public event EventHandler<IVector>? NewPositionNotification;
-
-    public IVector Velocity { get; set; }
-
-    #endregion IBall
-
-    #region private
-
-    private Vector Position;
-
-    private void RaiseNewPositionChangeNotification()
-    {
-      NewPositionNotification?.Invoke(this, Position);
-    }
-
-        //internal void Move(Vector delta)
-        //{
-        //  Position = new Vector(Position.x + delta.x, Position.y + delta.y);
-        //  RaiseNewPositionChangeNotification();
-        //}
-
-        // Add boundary constraints to ensure the ball does not move outside the table dimensions.
-        internal void Move(Vector delta, double radius)
+        internal void Move(Vector delta)
         {
-            // Calculate new center position
-            double newX = Position.x + delta.x;
-            double newY = Position.y + delta.y;
+            double newX = _position.x + delta.x;
+            double newY = _position.y + delta.y;
 
-            // Check horizontal bounds (left and right)
-            if (newX < 0)
+            // Boundary constraints
+            if (newX - Radius < 0)
             {
-                newX = 0;
+                newX = Radius;
                 Velocity = new Vector(-Velocity.x, Velocity.y);
             }
-            else if (newX + radius > _tableWidth)
+            else if (newX + Radius > _tableWidth)
             {
-                newX = _tableWidth - radius;
+                newX = _tableWidth - Radius;
                 Velocity = new Vector(-Velocity.x, Velocity.y);
             }
-
-            // Check vertical bounds (top and bottom)
-            if (newY < 0)
+            if (newY - Radius < 0)
             {
-                newY = 0;
+                newY = Radius;
                 Velocity = new Vector(Velocity.x, -Velocity.y);
             }
-            else if (newY + radius > _tableHeight)
+            else if (newY + Radius > _tableHeight)
             {
-                newY = _tableHeight - radius;
+                newY = _tableHeight - Radius;
                 Velocity = new Vector(Velocity.x, -Velocity.y);
             }
 
-            // Update position (center)
-            Position = new Vector(newX, newY);
+            _position = new Vector(newX, newY);
             RaiseNewPositionChangeNotification();
         }
 
-        #endregion private
+        internal void CollideWith(Ball other)
+        {
+            Vector v1 = (Vector)Velocity;
+            Vector v2 = (Vector)other.Velocity;
+            Vector x1 = _position;
+            Vector x2 = other._position;
+
+            Vector dx = new Vector(x1.x - x2.x, x1.y - x2.y);
+            Vector dv = new Vector(v1.x - v2.x, v1.y - v2.y);
+
+            double dot = dx.x * dv.x + dx.y * dv.y;
+            if (dot >= 0)
+                return;
+
+            double m1 = Mass;
+            double m2 = other.Mass;
+            double factor = 2 * m2 / (m1 + m2) * dot / (dx.x * dx.x + dx.y * dx.y);
+
+            Velocity = new Vector(v1.x - factor * dx.x, v1.y - factor * dx.y);
+            other.Velocity = new Vector(v2.x + factor * dx.x * m1 / m2, v2.y + factor * dx.y * m1 / m2);
+        }
+        #endregion
     }
 }

@@ -53,10 +53,10 @@ namespace TP.ConcurrentProgramming.Data
     double y { get; init; }
   }
 
-  public interface IBall
-  {
-    event EventHandler<IVector> NewPositionNotification;
-
-    IVector Velocity { get; set; }
-  }
+    public interface IBall
+    {
+        event EventHandler<IVector> NewPositionNotification;
+        IVector Velocity { get; set; }
+        double Radius { get; } // Właściwość Radius już istnieje
+    }
 }

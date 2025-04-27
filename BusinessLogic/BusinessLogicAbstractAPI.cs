@@ -58,8 +58,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     double y { get; init; }
   }
 
-  public interface IBall 
-  {
-    event EventHandler<IPosition> NewPositionNotification;
-  }
+    public interface IBall
+    {
+        event EventHandler<IPosition> NewPositionNotification;
+        double Radius { get; } // Dodajemy właściwość Radius
+    }
 }

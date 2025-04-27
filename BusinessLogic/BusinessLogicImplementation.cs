@@ -8,34 +8,32 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+using System;
 using System.Diagnostics;
 using UnderneathLayerAPI = TP.ConcurrentProgramming.Data.DataAbstractAPI;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
 {
-  internal class BusinessLogicImplementation : BusinessLogicAbstractAPI
-  {
-    #region ctor
-
-    public BusinessLogicImplementation() : this(null)
-    { }
-
-    internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
+    internal class BusinessLogicImplementation : BusinessLogicAbstractAPI
     {
-      layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
-    }
+        #region ctor
+        public BusinessLogicImplementation() : this(null)
+        { }
 
-    #endregion ctor
+        internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
+        {
+            layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
+        }
+        #endregion
 
-    #region BusinessLogicAbstractAPI
-
-    public override void Dispose()
-    {
-      if (Disposed)
-        throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
-      layerBellow.Dispose();
-      Disposed = true;
-    }
+        #region BusinessLogicAbstractAPI
+        public override void Dispose()
+        {
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
+            layerBellow.Dispose();
+            Disposed = true;
+        }
 
         public override void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IPosition, IBall> upperLayerHandler)
         {
@@ -49,26 +47,19 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 upperLayerHandler(new Position(startingPosition.x, startingPosition.y), new Ball(databall));
             });
         }
-
-
-        #endregion BusinessLogicAbstractAPI
+        #endregion
 
         #region private
-
         private bool Disposed = false;
+        private readonly UnderneathLayerAPI layerBellow;
+        #endregion
 
-    private readonly UnderneathLayerAPI layerBellow;
-
-    #endregion private
-
-    #region TestingInfrastructure
-
-    [Conditional("DEBUG")]
-    internal void CheckObjectDisposed(Action<bool> returnInstanceDisposed)
-    {
-      returnInstanceDisposed(Disposed);
+        #region TestingInfrastructure
+        [Conditional("DEBUG")]
+        internal void CheckObjectDisposed(Action<bool> returnInstanceDisposed)
+        {
+            returnInstanceDisposed(Disposed);
+        }
+        #endregion
     }
-
-    #endregion TestingInfrastructure
-  }
 }
