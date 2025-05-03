@@ -62,5 +62,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     {
         event EventHandler<IPosition> NewPositionNotification;
         double Radius { get; } // Dodajemy właściwość Radius
+        double Mass { get; }
     }
 }

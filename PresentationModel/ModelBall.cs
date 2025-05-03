@@ -23,6 +23,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
     {
       TopBackingField = top;
       LeftBackingField = left;
+      _mass = underneathBall.Mass;
       underneathBall.NewPositionNotification += NewPositionNotification;
     }
 
@@ -53,10 +54,12 @@ namespace TP.ConcurrentProgramming.Presentation.Model
     }
 
     public double Diameter { get; init; } = 0;
+    public double Mass => _mass;
+    public string Color => GetColorForMass(_mass);
 
-    #region INotifyPropertyChanged
+        #region INotifyPropertyChanged
 
-    public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
 
     #endregion INotifyPropertyChanged
 
@@ -66,8 +69,9 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
     private double TopBackingField;
     private double LeftBackingField;
+    private readonly double _mass;
 
-    private void NewPositionNotification(object sender, IPosition e)
+        private void NewPositionNotification(object sender, IPosition e)
     {
             Top = e.y - Diameter / 2; 
             Left = e.x - Diameter / 2;
@@ -78,11 +82,25 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    #endregion private
+        private string GetColorForMass(double mass)
+        {
+            if (mass < 1)
+                return "Yellow";
+            else if (mass < 2)
+                return "Blue";
+            else if (mass < 3)
+                return "Green";
+            else if (mass < 4)
+                return "Orange";
+            else
+                return "Red";
+        }
 
-    #region testing instrumentation
+        #endregion private
 
-    [Conditional("DEBUG")]
+        #region testing instrumentation
+
+        [Conditional("DEBUG")]
     internal void SetLeft(double x)
     { Left = x; }
 

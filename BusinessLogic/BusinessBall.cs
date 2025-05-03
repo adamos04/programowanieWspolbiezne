@@ -21,6 +21,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         #region IBall
         public event EventHandler<IPosition>? NewPositionNotification;
         public double Radius => _dataBall.Radius; // Przekazujemy promień z warstwy danych
+        public double Mass => _dataBall.Mass;
         #endregion
 
         #region private
