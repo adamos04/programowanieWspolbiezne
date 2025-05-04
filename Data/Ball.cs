@@ -20,7 +20,7 @@ namespace TP.ConcurrentProgramming.Data
             _tableWidth = tableWidth;
             _tableHeight = tableHeight;
             Mass = new Random().NextDouble() * 5 + double.Epsilon;
-            Radius = radius; // Promień przekazywany jako parametr
+            Radius = radius;
         }
         #endregion
 
@@ -29,9 +29,6 @@ namespace TP.ConcurrentProgramming.Data
         public IVector Velocity { get; set; }
         public double Mass { get; }
         public double Radius { get; }
-        #endregion
-
-        #region public
         public IVector Position => _position;
         #endregion
 
@@ -74,28 +71,6 @@ namespace TP.ConcurrentProgramming.Data
 
             _position = new Vector(newX, newY);
             RaiseNewPositionChangeNotification();
-        }
-
-        internal void CollideWith(Ball other)
-        {
-            Vector v1 = (Vector)Velocity;
-            Vector v2 = (Vector)other.Velocity;
-            Vector x1 = _position;
-            Vector x2 = other._position;
-
-            Vector dx = new Vector(x1.x - x2.x, x1.y - x2.y);
-            Vector dv = new Vector(v1.x - v2.x, v1.y - v2.y);
-
-            double dot = dx.x * dv.x + dx.y * dv.y;
-            if (dot >= 0)
-                return;
-
-            double m1 = Mass;
-            double m2 = other.Mass;
-            double factor = 2 * m2 / (m1 + m2) * dot / (dx.x * dx.x + dx.y * dx.y);
-
-            Velocity = new Vector(v1.x - factor * dx.x, v1.y - factor * dx.y);
-            other.Velocity = new Vector(v2.x + factor * dx.x * m1 / m2, v2.y + factor * dx.y * m1 / m2);
         }
         #endregion
     }

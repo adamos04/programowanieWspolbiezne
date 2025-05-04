@@ -67,7 +67,6 @@ namespace TP.ConcurrentProgramming.Data
 
         public override void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
@@ -86,23 +85,7 @@ namespace TP.ConcurrentProgramming.Data
                 lock (_lock)
                 {
                     var ballsCopy = BallsList.ToList();
-                    // Detect collisions
-                    for (int i = 0; i < ballsCopy.Count; i++)
-                    {
-                        for (int j = i + 1; j < ballsCopy.Count; j++)
-                        {
-                            Ball ball1 = ballsCopy[i];
-                            Ball ball2 = ballsCopy[j];
-                            double dx = ball1.Position.x - ball2.Position.x;
-                            double dy = ball1.Position.y - ball2.Position.y;
-                            double distance = Math.Sqrt(dx * dx + dy * dy);
-                            if (distance < ball1.Radius + ball2.Radius) // Używa dynamicznego promienia
-                            {
-                                ball1.CollideWith(ball2);
-                            }
-                        }
-                    }
-                    // Move balls
+
                     foreach (Ball ball in ballsCopy)
                     {
                         ball.Move((Vector)ball.Velocity);

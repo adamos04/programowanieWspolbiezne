@@ -9,7 +9,9 @@
 //_____________________________________________________________________________________________________________________________________
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using UnderneathLayerAPI = TP.ConcurrentProgramming.Data.DataAbstractAPI;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
@@ -18,11 +20,13 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     {
         #region ctor
         public BusinessLogicImplementation() : this(null)
-        { }
+        {
+        }
 
         internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
         {
             layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
+            CollisionTask = Task.Run(DetectCollisionsAsync);
         }
         #endregion
 
@@ -31,7 +35,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         {
             if (Disposed)
                 throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
+            CollisionTask?.Wait();
             layerBellow.Dispose();
+            BallsList.Clear();
             Disposed = true;
         }
 
@@ -44,7 +50,12 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
             layerBellow.Start(numberOfBalls, tableWidth, tableHeight, (startingPosition, databall) =>
             {
-                upperLayerHandler(new Position(startingPosition.x, startingPosition.y), new Ball(databall));
+                Ball logicBall = new Ball(databall);
+                upperLayerHandler(new Position(startingPosition.x, startingPosition.y), logicBall);
+                lock (_lock)
+                {
+                    BallsList.Add(logicBall);
+                }
             });
         }
         #endregion
@@ -52,6 +63,36 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         #region private
         private bool Disposed = false;
         private readonly UnderneathLayerAPI layerBellow;
+        private readonly Task? CollisionTask;
+        private readonly List<Ball> BallsList = [];
+        private readonly object _lock = new();
+
+        private async Task DetectCollisionsAsync()
+        {
+            while (!Disposed)
+            {
+                lock (_lock)
+                {
+                    var ballsCopy = BallsList.ToList();
+                    for (int i = 0; i < ballsCopy.Count; i++)
+                    {
+                        for (int j = i + 1; j < ballsCopy.Count; j++)
+                        {
+                            Ball ball1 = ballsCopy[i];
+                            Ball ball2 = ballsCopy[j];
+                            double dx = ball1.DataBall.Position.x - ball2.DataBall.Position.x;
+                            double dy = ball1.DataBall.Position.y - ball2.DataBall.Position.y;
+                            double distance = Math.Sqrt(dx * dx + dy * dy);
+                            if (distance < ball1.Radius + ball2.Radius)
+                            {
+                                ball1.CollideWith(ball2);
+                            }
+                        }
+                    }
+                }
+                await Task.Delay(16); // ~60 FPS
+            }
+        }
         #endregion
 
         #region TestingInfrastructure

@@ -11,10 +11,10 @@
 
 namespace TP.ConcurrentProgramming.Data
 {
-  /// <summary>
-  ///  Two dimensions immutable vector
-  /// </summary>
-  internal record Vector : IVector
+    /// <summary>
+    ///  Two dimensions immutable vector
+    /// </summary>
+    public record Vector : IVector
   {
     #region IVector
 
