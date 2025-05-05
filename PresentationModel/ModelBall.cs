@@ -9,6 +9,7 @@
 //  by introducing yourself and telling us what you do with this community.
 //_____________________________________________________________________________________________________________________________________
 
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -84,16 +85,15 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         private string GetColorForMass(double mass)
         {
-            if (mass < 1)
-                return "Yellow";
-            else if (mass < 2)
-                return "Blue";
-            else if (mass < 3)
-                return "Green";
-            else if (mass < 4)
-                return "Orange";
-            else
-                return "Red";
+            if (mass < 0 || mass > 5)
+                throw new ArgumentOutOfRangeException("Mass must be between 0 and 5");
+
+
+            int red = (int)(255 - 35 * mass);
+            int greenBlue = (int)(200 * (1 - mass / 5));
+            string hexColor = $"#{red:X2}{greenBlue:X2}{greenBlue:X2}";
+
+            return hexColor;
         }
 
         #endregion private
