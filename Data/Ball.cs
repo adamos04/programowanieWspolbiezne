@@ -47,15 +47,16 @@ namespace TP.ConcurrentProgramming.Data
             double newX = _position.x + delta.x;
             double newY = _position.y + delta.y;
 
+            double borderThickness = 4.0;
             // Boundary constraints
             if (newX - Radius < 0)
             {
                 newX = Radius;
                 Velocity = new Vector(-Velocity.x, Velocity.y);
             }
-            else if (newX + Radius > _tableWidth)
+            else if (newX + Radius > _tableWidth - borderThickness)
             {
-                newX = _tableWidth - Radius;
+                newX = _tableWidth - borderThickness - Radius;
                 Velocity = new Vector(-Velocity.x, Velocity.y);
             }
             if (newY - Radius < 0)
@@ -63,9 +64,9 @@ namespace TP.ConcurrentProgramming.Data
                 newY = Radius;
                 Velocity = new Vector(Velocity.x, -Velocity.y);
             }
-            else if (newY + Radius > _tableHeight)
+            else if (newY + Radius > _tableHeight - borderThickness)
             {
-                newY = _tableHeight - Radius;
+                newY = _tableHeight - borderThickness - Radius;
                 Velocity = new Vector(Velocity.x, -Velocity.y);
             }
 
