@@ -30,7 +30,7 @@ namespace TP.ConcurrentProgramming.Data
                 throw new ArgumentNullException(nameof(upperLayerHandler));
 
             double minDimension = Math.Min(tableWidth, tableHeight);
-            double radius = Math.Clamp(minDimension / 20.0, 2.0, 20.0);
+            double radius = 0.04 * tableHeight;
 
             Random random = new Random();
             for (int i = 0; i < numberOfBalls; i++)

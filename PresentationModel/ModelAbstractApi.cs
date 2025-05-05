@@ -17,6 +17,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
     double Top { get; }
     double Left { get; }
     double Diameter { get; }
+    double Radius { get; }
     double Mass { get;  }
   }
 

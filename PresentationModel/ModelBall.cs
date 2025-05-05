@@ -25,6 +25,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
       TopBackingField = top;
       LeftBackingField = left;
       _mass = underneathBall.Mass;
+      _radius = underneathBall.Radius;
       underneathBall.NewPositionNotification += NewPositionNotification;
     }
 
@@ -55,6 +56,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model
     }
 
     public double Diameter { get; init; } = 0;
+    public double Radius => _radius;
     public double Mass => _mass;
     public string Color => GetColorForMass(_mass);
 
@@ -71,11 +73,12 @@ namespace TP.ConcurrentProgramming.Presentation.Model
     private double TopBackingField;
     private double LeftBackingField;
     private readonly double _mass;
+    private readonly double _radius;
 
         private void NewPositionNotification(object sender, IPosition e)
     {
-            Top = e.y - Diameter / 2; 
-            Left = e.x - Diameter / 2;
+            Top = e.y - Radius; 
+            Left = e.x - Radius;
         }
 
     private void RaisePropertyChanged([CallerMemberName] string propertyName = "")
