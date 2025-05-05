@@ -29,7 +29,30 @@ namespace TP.ConcurrentProgramming.Data
         public IVector Velocity { get; set; }
         public double Mass { get; }
         public double Radius { get; }
-        public IVector Position => _position;
+        public IVector Position
+        {
+            get => _position;
+            set
+            {
+                if (value is Vector vector)
+                {
+                    _position = vector;
+                    RaiseNewPositionChangeNotification();
+                }
+                else
+                {
+                    throw new ArgumentException("Position must be of type Vector");
+                }
+            }
+        }
+        public double TableWidth
+        {
+            get => _tableWidth;
+        }
+        public double TableHeight
+        {
+            get => _tableHeight;
+        }
         #endregion
 
         #region private
@@ -46,29 +69,6 @@ namespace TP.ConcurrentProgramming.Data
         {
             double newX = _position.x + delta.x;
             double newY = _position.y + delta.y;
-
-            double borderThickness = 4.0;
-            // Boundary constraints
-            if (newX - Radius < 0)
-            {
-                newX = Radius;
-                Velocity = new Vector(-Velocity.x, Velocity.y);
-            }
-            else if (newX + Radius > _tableWidth - borderThickness)
-            {
-                newX = _tableWidth - borderThickness - Radius;
-                Velocity = new Vector(-Velocity.x, Velocity.y);
-            }
-            if (newY - Radius < 0)
-            {
-                newY = Radius;
-                Velocity = new Vector(Velocity.x, -Velocity.y);
-            }
-            else if (newY + Radius > _tableHeight - borderThickness)
-            {
-                newY = _tableHeight - borderThickness - Radius;
-                Velocity = new Vector(Velocity.x, -Velocity.y);
-            }
 
             _position = new Vector(newX, newY);
             RaiseNewPositionChangeNotification();

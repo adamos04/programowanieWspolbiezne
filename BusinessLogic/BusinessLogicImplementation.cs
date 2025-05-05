@@ -89,6 +89,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                             }
                         }
                     }
+                    foreach (var ball in ballsCopy)
+                    {
+                        ball.CheckWallCollisions();
+                    }
                 }
                 await Task.Delay(16); // ~60 FPS
             }

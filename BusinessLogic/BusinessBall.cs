@@ -50,6 +50,41 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             _dataBall.Velocity = new Data.Vector(v1.x - factor * dx.x, v1.y - factor * dx.y);
             other._dataBall.Velocity = new Data.Vector(v2.x + factor * dx.x * m1 / m2, v2.y + factor * dx.y * m1 / m2);
         }
+
+        internal void CheckWallCollisions()
+        {
+            double borderThickness = 4.0;
+            double newX = _dataBall.Position.x;
+            double newY = _dataBall.Position.y;
+            double tableWidth = _dataBall.TableWidth;
+            double tableHeight = _dataBall.TableHeight;
+
+            if (newX - Radius < 0)
+            {
+                newX = Radius;
+                _dataBall.Velocity = new Data.Vector(-_dataBall.Velocity.x, _dataBall.Velocity.y);
+            }
+            else if (newX + Radius > tableWidth - borderThickness)
+            {
+                newX = tableWidth - borderThickness - Radius;
+                _dataBall.Velocity = new Data.Vector(-_dataBall.Velocity.x, _dataBall.Velocity.y);
+            }
+            if (newY - Radius < 0)
+            {
+                newY = Radius;
+                _dataBall.Velocity = new Data.Vector(_dataBall.Velocity.x, -_dataBall.Velocity.y);
+            }
+            else if (newY + Radius > tableHeight - borderThickness)
+            {
+                newY = tableHeight - borderThickness - Radius;
+                _dataBall.Velocity = new Data.Vector(_dataBall.Velocity.x, -_dataBall.Velocity.y);
+            }
+
+            if (newX != _dataBall.Position.x || newY != _dataBall.Position.y)
+            {
+                _dataBall.Position = new Data.Vector(newX, newY);
+            }
+        }
         #endregion
 
         #region private
