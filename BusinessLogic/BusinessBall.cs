@@ -53,7 +53,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         internal void CheckWallCollisions()
         {
-            double borderThickness = 4.0;
+            double borderThickness = 8.0;
             double newX = _dataBall.Position.x;
             double newY = _dataBall.Position.y;
             double tableWidth = _dataBall.TableWidth;

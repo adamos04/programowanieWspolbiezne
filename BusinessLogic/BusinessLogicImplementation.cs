@@ -8,10 +8,7 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using UnderneathLayerAPI = TP.ConcurrentProgramming.Data.DataAbstractAPI;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
@@ -25,8 +22,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
         {
-            layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
-            CollisionTask = Task.Run(DetectCollisionsAsync);
+            layerBellow = underneathLayer ?? UnderneathLayerAPI.GetDataLayer();
+            _cancellationTokenSource = new CancellationTokenSource();
+            CollisionTask = Task.Run(() => DetectCollisionsAsync(_cancellationTokenSource.Token), _cancellationTokenSource.Token);
         }
         #endregion
 
@@ -35,9 +33,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         {
             if (Disposed)
                 throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
-            CollisionTask?.Wait();
+            _cancellationTokenSource.Cancel();
             layerBellow.Dispose();
             BallsList.Clear();
+            _cancellationTokenSource.Dispose();
             Disposed = true;
         }
 
@@ -64,12 +63,13 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         private bool Disposed = false;
         private readonly UnderneathLayerAPI layerBellow;
         private readonly Task? CollisionTask;
+        private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly List<Ball> BallsList = [];
         private readonly object _lock = new();
 
-        private async Task DetectCollisionsAsync()
+        private async Task DetectCollisionsAsync(CancellationToken cancellationToken)
         {
-            while (!Disposed)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 lock (_lock)
                 {
@@ -94,7 +94,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                         ball.CheckWallCollisions();
                     }
                 }
-                await Task.Delay(16); // ~60 FPS
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+                await Task.Delay(10); // ~60 FPS
             }
         }
         #endregion

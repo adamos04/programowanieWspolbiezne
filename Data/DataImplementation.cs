@@ -17,7 +17,8 @@ namespace TP.ConcurrentProgramming.Data
         #region ctor
         public DataImplementation()
         {
-            MoveTask = Task.Run(MoveAsync);
+            _cancellationTokenSource = new CancellationTokenSource();
+            MoveTask = Task.Run(() => MoveAsync(_cancellationTokenSource.Token), _cancellationTokenSource.Token);
         }
         #endregion
 
@@ -38,7 +39,7 @@ namespace TP.ConcurrentProgramming.Data
                 double x = radius + random.NextDouble() * (tableWidth - 2 * radius);
                 double y = radius + random.NextDouble() * (tableHeight - 2 * radius);
                 Vector startingPosition = new(x, y);
-                Vector velocity = new Vector((random.NextDouble() - 0.5) * 10, (random.NextDouble() - 0.5) * 10);
+                Vector velocity = new Vector((random.NextDouble() - 0.5) * 5, (random.NextDouble() - 0.5) * 5);
                 Ball newBall = new(startingPosition, velocity, tableWidth, tableHeight, radius);
                 upperLayerHandler(startingPosition, newBall);
                 lock (_lock)
@@ -56,8 +57,9 @@ namespace TP.ConcurrentProgramming.Data
             {
                 if (disposing)
                 {
-                    MoveTask?.Wait();
+                    _cancellationTokenSource.Cancel();
                     BallsList.Clear();
+                    _cancellationTokenSource.Dispose();
                 }
                 Disposed = true;
             }
@@ -75,22 +77,24 @@ namespace TP.ConcurrentProgramming.Data
         #region private
         private bool Disposed = false;
         private readonly Task? MoveTask;
+        private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly List<Ball> BallsList = [];
         private readonly object _lock = new();
 
-        private async Task MoveAsync()
+        private async Task MoveAsync(CancellationToken cancellationToken)
         {
-            while (!Disposed)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 lock (_lock)
                 {
                     var ballsCopy = BallsList.ToList();
-
                     foreach (Ball ball in ballsCopy)
                     {
                         ball.Move((Vector)ball.Velocity);
                     }
                 }
+                if (cancellationToken.IsCancellationRequested)
+                    break;
                 await Task.Delay(16); // ~60 FPS
             }
         }
