@@ -18,7 +18,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
     [TestMethod]
     public void DisposeTestMethod()
     {
-      UnderneathLayerFixture underneathLayerFixture = new UnderneathLayerFixture();
+      UnderneathLayerFixture underneathLayerFixture = new();
       ModelImplementation? newInstance = null;
       using (newInstance = new(underneathLayerFixture))
       {
@@ -36,18 +36,16 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
     [TestMethod]
     public void StartTestMethod()
     {
-      UnderneathLayerFixture underneathLayerFixture = new UnderneathLayerFixture();
-      using (ModelImplementation newInstance = new(underneathLayerFixture))
-      {
-        newInstance.CheckBallChangedEvent(x => Assert.IsTrue(x));
-        IDisposable subscription = newInstance.Subscribe(x => { });
-        newInstance.CheckBallChangedEvent(x => Assert.IsFalse(x));
-        newInstance.Start(10, 200, 200);
-        Assert.AreEqual<int>(10, underneathLayerFixture.NumberOfBalls);
-        subscription.Dispose();
-        newInstance.CheckBallChangedEvent(x => Assert.IsTrue(x));
-      }
-    }
+      UnderneathLayerFixture underneathLayerFixture = new();
+            using ModelImplementation newInstance = new(underneathLayerFixture);
+            newInstance.CheckBallChangedEvent(x => Assert.IsTrue(x));
+            IDisposable subscription = newInstance.Subscribe(x => { });
+            newInstance.CheckBallChangedEvent(x => Assert.IsFalse(x));
+            newInstance.Start(10, 200, 200);
+            Assert.AreEqual<int>(10, underneathLayerFixture.NumberOfBalls);
+            subscription.Dispose();
+            newInstance.CheckBallChangedEvent(x => Assert.IsTrue(x));
+        }
 
     #region testing instrumentation
 

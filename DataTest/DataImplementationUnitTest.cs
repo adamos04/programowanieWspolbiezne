@@ -16,21 +16,19 @@ namespace TP.ConcurrentProgramming.Data.Test
     [TestMethod]
     public void ConstructorTestMethod()
     {
-      using (DataImplementation newInstance = new DataImplementation())
-      {
-        IEnumerable<IBall>? ballsList = null;
-        newInstance.CheckBallsList(x => ballsList = x);
-        Assert.IsNotNull(ballsList);
-        int numberOfBalls = 0;
-        newInstance.CheckNumberOfBalls(x => numberOfBalls = x);
-        Assert.AreEqual<int>(0, numberOfBalls);
-      }
-    }
+            using DataImplementation newInstance = new();
+            IEnumerable<IBall>? ballsList = null;
+            newInstance.CheckBallsList(x => ballsList = x);
+            Assert.IsNotNull(ballsList);
+            int numberOfBalls = 0;
+            newInstance.CheckNumberOfBalls(x => numberOfBalls = x);
+            Assert.AreEqual<int>(0, numberOfBalls);
+        }
 
     [TestMethod]
     public void DisposeTestMethod()
     {
-      DataImplementation newInstance = new DataImplementation();
+      DataImplementation newInstance = new();
       bool newInstanceDisposed = false;
       newInstance.CheckObjectDisposed(x => newInstanceDisposed = x);
       Assert.IsFalse(newInstanceDisposed);
@@ -48,24 +46,22 @@ namespace TP.ConcurrentProgramming.Data.Test
     [TestMethod]
     public void StartTestMethod()
     {
-      using (DataImplementation newInstance = new DataImplementation())
-      {
-        int numberOfCallbackInvoked = 0;
-        int numberOfBalls2Create = 10;
-        newInstance.Start(
-          numberOfBalls2Create,
-            400.0,
-            400.0,
-          (startingPosition, ball) =>
-          {
-            numberOfCallbackInvoked++;
-            Assert.IsTrue(startingPosition.x >= 0);
-            Assert.IsTrue(startingPosition.y >= 0);
-            Assert.IsNotNull(ball);
-          });
-        Assert.AreEqual<int>(numberOfBalls2Create, numberOfCallbackInvoked);
-        newInstance.CheckNumberOfBalls(x => Assert.AreEqual<int>(10, x));
-      }
-    }
+            using DataImplementation newInstance = new();
+            int numberOfCallbackInvoked = 0;
+            int numberOfBalls2Create = 10;
+            newInstance.Start(
+              numberOfBalls2Create,
+                400.0,
+                400.0,
+              (startingPosition, ball) =>
+              {
+                  numberOfCallbackInvoked++;
+                  Assert.IsTrue(startingPosition.x >= 0);
+                  Assert.IsTrue(startingPosition.y >= 0);
+                  Assert.IsNotNull(ball);
+              });
+            Assert.AreEqual<int>(numberOfBalls2Create, numberOfCallbackInvoked);
+            newInstance.CheckNumberOfBalls(x => Assert.AreEqual<int>(10, x));
+        }
   }
 }

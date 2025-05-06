@@ -16,7 +16,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
     [TestMethod]
     public void ConstructorTestMethod()
     {
-      Random random = new Random();
+      Random random = new();
       double initialX = random.NextDouble();
       double initialY = random.NextDouble();
       IPosition position = new Position(initialX, initialY);

@@ -18,7 +18,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
     [TestMethod]
     public void ConstructorTestMethod()
     {
-      ModelBall ball = new ModelBall(0.0, 0.0, new BusinessLogicIBallFixture());
+      ModelBall ball = new(0.0, 0.0, new BusinessLogicIBallFixture());
       Assert.AreEqual<double>(0.0, ball.Top);
       Assert.AreEqual<double>(0.0, ball.Top);
     }
@@ -27,7 +27,7 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
     public void PositionChangeNotificationTestMethod()
     {
       int notificationCounter = 0;
-      ModelBall ball = new ModelBall(0, 0.0, new BusinessLogicIBallFixture());
+      ModelBall ball = new(0, 0.0, new BusinessLogicIBallFixture());
       ball.PropertyChanged += (sender, args) => notificationCounter++;
       Assert.AreEqual(0, notificationCounter);
       ball.SetLeft(1.0);
@@ -39,22 +39,24 @@ namespace TP.ConcurrentProgramming.Presentation.Model.Test
       Assert.AreEqual<double>(1.0, ball.Left);
       Assert.AreEqual<double>(1.0, ball.Top);
     }
-
-    #region testing instrumentation
-
-    private class BusinessLogicIBallFixture : BusinessLogic.IBall
-    {
-      public event EventHandler<IPosition>? NewPositionNotification;
-
-      public void Dispose()
-      {
-        throw new NotImplementedException();
-      }
-        public void TriggerNewPositionNotification(IPosition position)
+        #region testing instrumentation
+        private class BusinessLogicIBallFixture : BusinessLogic.IBall
         {
-            NewPositionNotification?.Invoke(this, position);
+            public event EventHandler<IPosition>? NewPositionNotification;
+
+            public double Radius { get; } = 0.0; // Implementing the Radius property
+            public double Mass { get; } = 0.0;   // Implementing the Mass property
+
+            public void Dispose()
+            {
+                throw new NotImplementedException();
+            }
+
+            public void TriggerNewPositionNotification(IPosition position)
+            {
+                NewPositionNotification?.Invoke(this, position);
+            }
         }
-    }
 
     #endregion testing instrumentation
   }

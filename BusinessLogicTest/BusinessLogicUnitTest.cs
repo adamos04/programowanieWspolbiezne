@@ -29,7 +29,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
     [TestMethod]
     public void DisposeTestMethod()
     {
-      DataLayerDisposeFixcure dataLayerFixcure = new DataLayerDisposeFixcure();
+      DataLayerDisposeFixcure dataLayerFixcure = new();
       BusinessLogicImplementation newInstance = new(dataLayerFixcure);
       Assert.IsFalse(dataLayerFixcure.Disposed);
       bool newInstanceDisposed = true;
@@ -90,41 +90,52 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       }
     }
 
-    private class DataLayerStartFixcure : Data.DataAbstractAPI
-    {
-      internal bool StartCalled = false;
-      internal int NumberOfBallseCreated = -1;
-
-      public override void Dispose()
-      { }
-
-      public override void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, Data.IBall> upperLayerHandler)
-      {
-        StartCalled = true;
-        NumberOfBallseCreated = numberOfBalls;
-        upperLayerHandler(new DataVectorFixture(), new DataBallFixture());
-      }
-
-      private record DataVectorFixture : Data.IVector
-      {
-        public double x { get; init; }
-        public double y { get; init; }
-      }
-
-      private class DataBallFixture : Data.IBall
-      {
-        public IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        public event EventHandler<IVector>? NewPositionNotification = null;
-
-        public void SimulateNewPositionNotification(IVector newPosition)
+        private class DataLayerStartFixcure : Data.DataAbstractAPI
         {
-            NewPositionNotification?.Invoke(this, newPosition);
+            internal bool StartCalled = false;
+            internal int NumberOfBallseCreated = -1;
+
+            public override void Dispose()
+            { }
+
+            public override void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, Data.IBall> upperLayerHandler)
+            {
+                StartCalled = true;
+                NumberOfBallseCreated = numberOfBalls;
+                upperLayerHandler(new DataVectorFixture(), new DataBallFixture { Velocity = new DataVectorFixture(), TableWidth = tableWidth, TableHeight = tableHeight });
+            }
+
+            private record DataVectorFixture : Data.IVector
+            {
+                public double x { get; init; }
+                public double y { get; init; }
+            }
+
+            private class DataBallFixture : Data.IBall
+            {
+                public required IVector Velocity { get; set; } = new DataVectorFixture();
+                public double Radius { get; } = 1.0;
+                public double Mass { get; } = 1.0;
+                public IVector Position { get; set; } = new DataVectorFixture();
+                public double TableWidth { get; set; }
+                public double TableHeight { get; set; }
+
+                public event EventHandler<IVector>? NewPositionNotification;
+
+                public void SimulateNewPositionNotification(IVector newPosition)
+                {
+                    NewPositionNotification?.Invoke(this, newPosition);
+                }
+
+                private record DataVectorFixture : Data.IVector
+                {
+                    public double x { get; init; } = 0.0;
+                    public double y { get; init; } = 0.0;
+                }
+            }
         }
 
-      }
-    }
-
+  
     #endregion testing instrumentation
   }
 }

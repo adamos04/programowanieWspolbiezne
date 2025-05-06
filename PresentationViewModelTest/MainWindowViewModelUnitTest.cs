@@ -24,13 +24,13 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
     public void ConstructorTest()
     {
       ModelNullFixture nullModelFixture = new();
-      ScreenSizeProxy screenSize = new ScreenSizeProxy();
+      ScreenSizeProxy screenSize = new();
       Assert.AreEqual<int>(0, nullModelFixture.Disposed);
       Assert.AreEqual<int>(0, nullModelFixture.Started);
       Assert.AreEqual<int>(0, nullModelFixture.Subscribed);
       using (MainWindowViewModel viewModel = new(nullModelFixture, screenSize))
       {
-        Random random = new Random();
+        Random random = new();
         int numberOfBalls = random.Next(1, 10);
         viewModel.Start(numberOfBalls, 200, 200);
         Assert.IsNotNull(viewModel.Balls);
@@ -45,11 +45,11 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
     public void BehaviorTestMethod()
     {
       ModelSimulatorFixture modelSimulator = new();
-      ScreenSizeProxy screenSize = new ScreenSizeProxy();
+      ScreenSizeProxy screenSize = new();
       MainWindowViewModel viewModel = new(modelSimulator, screenSize);
       Assert.IsNotNull(viewModel.Balls);
       Assert.AreEqual<int>(0, viewModel.Balls.Count);
-      Random random = new Random();
+      Random random = new();
       int numberOfBalls = random.Next(1, 10);
       viewModel.Start(numberOfBalls, 200, 200);
       Assert.AreEqual<int>(numberOfBalls, viewModel.Balls.Count);
@@ -133,7 +133,7 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
       {
         for (int i = 0; i < numberOfBalls; i++)
         {
-          ModelBall newBall = new ModelBall(0, 0) { };
+          ModelBall newBall = new(0, 0) { };
           BallChanged?.Invoke(this, new BallChaneEventArgs() { Ball = newBall });
         }
       }
@@ -153,34 +153,36 @@ namespace TP.ConcurrentProgramming.Presentation.ViewModel.Test
 
       #region private
 
-      private IObservable<EventPattern<BallChaneEventArgs>>? eventObservable = null;
+      private readonly IObservable<EventPattern<BallChaneEventArgs>>? eventObservable = null;
 
-      private class ModelBall : ModelIBall
-      {
-        public ModelBall(double top, double left)
-        { }
+            private class ModelBall(double top, double left) : ModelIBall
+            {
 
-        #region IBall
+                #region IBall
 
-        public double Diameter => throw new NotImplementedException();
+                public double Diameter => throw new NotImplementedException();
 
-        public double Top => throw new NotImplementedException();
+                public double Top { get; } = top;
 
-        public double Left => throw new NotImplementedException();
+                public double Left { get; } = left;
 
-        #region INotifyPropertyChanged
+                public double Radius => throw new NotImplementedException(); // Added to fix CS0535
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+                public double Mass => throw new NotImplementedException(); // Added to fix CS0535
 
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+                #region INotifyPropertyChanged
 
-        #endregion INotifyPropertyChanged
+                public event PropertyChangedEventHandler? PropertyChanged;
 
-        #endregion IBall
-      }
+                protected virtual void OnPropertyChanged(string propertyName)
+                {
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                }
+
+                #endregion INotifyPropertyChanged
+
+                #endregion IBall
+            }
 
       #endregion private
     }
