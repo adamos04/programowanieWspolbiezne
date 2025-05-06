@@ -74,29 +74,37 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 lock (_lock)
                 {
                     var ballsCopy = BallsList.ToList();
-                    for (int i = 0; i < ballsCopy.Count; i++)
+                    bool collisionDetected;
+                    do
                     {
-                        for (int j = i + 1; j < ballsCopy.Count; j++)
+                        collisionDetected = false;
+                        // Kolizje między kulkami
+                        for (int i = 0; i < ballsCopy.Count; i++)
                         {
-                            Ball ball1 = ballsCopy[i];
-                            Ball ball2 = ballsCopy[j];
-                            double dx = ball1.DataBall.Position.x - ball2.DataBall.Position.x;
-                            double dy = ball1.DataBall.Position.y - ball2.DataBall.Position.y;
-                            double distance = Math.Sqrt(dx * dx + dy * dy);
-                            if (distance < ball1.Radius + ball2.Radius)
+                            for (int j = i + 1; j < ballsCopy.Count; j++)
                             {
-                                ball1.CollideWith(ball2);
+                                Ball ball1 = ballsCopy[i];
+                                Ball ball2 = ballsCopy[j];
+                                double dx = ball1.DataBall.Position.x - ball2.DataBall.Position.x;
+                                double dy = ball1.DataBall.Position.y - ball2.DataBall.Position.y;
+                                double distance = Math.Sqrt(dx * dx + dy * dy);
+                                if (distance < ball1.Radius + ball2.Radius)
+                                {
+                                    ball1.CollideWith(ball2);
+                                    collisionDetected = true;
+                                }
                             }
                         }
-                    }
-                    foreach (var ball in ballsCopy)
-                    {
-                        ball.CheckWallCollisions();
-                    }
+                        // Kolizje ze ściankami
+                        foreach (var ball in ballsCopy)
+                        {
+                            ball.CheckWallCollisions();
+                        }
+                    } while (collisionDetected); // Powtarzaj, aż nie będzie kolizji
                 }
                 if (cancellationToken.IsCancellationRequested)
                     break;
-                await Task.Delay(10); // ~60 FPS
+                await Task.Delay(10);
             }
         }
         #endregion

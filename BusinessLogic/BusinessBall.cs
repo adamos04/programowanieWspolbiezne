@@ -47,8 +47,23 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             double m2 = other.Mass;
             double factor = 2 * m2 / (m1 + m2) * dot / (dx.x * dx.x + dx.y * dx.y);
 
+            // Aktualizacja prędkości
             _dataBall.Velocity = new Data.Vector(v1.x - factor * dx.x, v1.y - factor * dx.y);
             other._dataBall.Velocity = new Data.Vector(v2.x + factor * dx.x * m1 / m2, v2.y + factor * dx.y * m1 / m2);
+
+            // Korekta pozycji, aby kulki się nie przenikały
+            double distance = Math.Sqrt(dx.x * dx.x + dx.y * dx.y);
+            double overlap = (Radius + other.Radius) - distance;
+            if (overlap > 0)
+            {
+                // Normalizacja wektora dx
+                double nx = dx.x / distance;
+                double ny = dx.y / distance;
+                // Przesunięcie kulek proporcjonalnie do ich mas
+                double correctionFactor = overlap / (m1 + m2);
+                _dataBall.Position = new Data.Vector(x1.x + nx * correctionFactor * m2, x1.y + ny * correctionFactor * m2);
+                other._dataBall.Position = new Data.Vector(x2.x - nx * correctionFactor * m1, x2.y - ny * correctionFactor * m1);
+            }
         }
 
         internal void CheckWallCollisions()
@@ -59,6 +74,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             double tableWidth = _dataBall.TableWidth;
             double tableHeight = _dataBall.TableHeight;
 
+            // Korekta pozycji w przypadku przeniknięcia
             if (newX - Radius < 0)
             {
                 newX = Radius;
@@ -80,10 +96,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 _dataBall.Velocity = new Data.Vector(_dataBall.Velocity.x, -_dataBall.Velocity.y);
             }
 
-            if (newX != _dataBall.Position.x || newY != _dataBall.Position.y)
-            {
-                _dataBall.Position = new Data.Vector(newX, newY);
-            }
+            // Bezwarunkowa aktualizacja pozycji, jeśli zmieniono newX lub newY
+            _dataBall.Position = new Data.Vector(newX, newY);
         }
         #endregion
 
