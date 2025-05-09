@@ -39,5 +39,6 @@ namespace TP.ConcurrentProgramming.Data
         IVector Position { get; set; } 
         double TableWidth { get; }
         double TableHeight { get; }
+        void Dispose();
     }
 }

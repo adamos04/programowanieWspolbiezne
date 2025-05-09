@@ -12,10 +12,14 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 {
     internal class Ball : IBall
     {
-        public Ball(Data.IBall ball)
+        public Ball(Data.IBall ball, List<Ball> otherBalls, object sharedLock)
         {
             _dataBall = ball;
+            _otherBalls = otherBalls;
+            _lock = sharedLock;
             _dataBall.NewPositionNotification += RaisePositionChangeEvent;
+            _collisionCts = new CancellationTokenSource();
+            _collisionTask = Task.Run(() => DetectCollisionsAsync(_collisionCts.Token), _collisionCts.Token);
         }
 
         #region IBall
@@ -26,6 +30,24 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         #region public
         public Data.IBall DataBall => _dataBall;
+
+        public void Dispose()
+        {
+            if (_disposed) return; // Zabezpieczenie przed wielokrotnym wywołaniem Dispose
+            _disposed = true;
+
+            _collisionCts.Cancel(); // Anulujemy zadanie
+            try
+            {
+                _collisionTask.Wait(); // Czekamy na zakończenie zadania
+            }
+            catch (AggregateException)
+            {
+                // Ignorujemy wyjątki, jeśli zadanie zostało anulowane
+            }
+            _collisionCts.Dispose(); // Teraz bezpiecznie utylizujemy _collisionCts
+            _dataBall.Dispose(); // Wywołujemy Dispose na Data.Ball
+        }
         #endregion
 
         #region internal
@@ -103,6 +125,40 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         #region private
         private readonly Data.IBall _dataBall;
+        private readonly List<Ball> _otherBalls;
+        private readonly object _lock;
+        private readonly Task _collisionTask;
+        private readonly CancellationTokenSource _collisionCts;
+        private bool _disposed = false;
+
+        private async Task DetectCollisionsAsync(CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                // Sprawdzenie kolizji ze ściankami
+                CheckWallCollisions();
+
+                // Sprawdzenie kolizji z innymi kulkami
+                lock (_lock)
+                {
+                    foreach (var otherBall in _otherBalls)
+                    {
+                        if (otherBall == this) continue;
+                        double dx = _dataBall.Position.x - otherBall.DataBall.Position.x;
+                        double dy = _dataBall.Position.y - otherBall.DataBall.Position.y;
+                        double distance = Math.Sqrt(dx * dx + dy * dy);
+                        if (distance < Radius + otherBall.Radius)
+                        {
+                            CollideWith(otherBall);
+                        }
+                    }
+                }
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+                await Task.Delay(10); // Opóźnienie 10 ms
+                
+            }
+        }
 
         private void RaisePositionChangeEvent(object? sender, Data.IVector e)
         {

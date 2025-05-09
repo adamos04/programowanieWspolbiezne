@@ -21,27 +21,60 @@ namespace TP.ConcurrentProgramming.Data
             _tableHeight = tableHeight;
             Mass = new Random().NextDouble() * 5 + double.Epsilon;
             Radius = radius;
+            _cts = new CancellationTokenSource();
         }
         #endregion
 
         #region IBall
         public event EventHandler<IVector>? NewPositionNotification;
-        public IVector Velocity { get; set; }
+        public IVector Velocity
+        {
+            get
+            {
+                lock (_velocityLock)
+                {
+                    return _velocity;
+                }
+            }
+            set
+            {
+                lock (_velocityLock)
+                {
+                    if (value is Vector vector)
+                    {
+                        _velocity = vector;
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Velocity must be of type Vector");
+                    }
+                }
+            }
+        }
         public double Mass { get; }
         public double Radius { get; }
         public IVector Position
         {
-            get => _position;
+            get
+            {
+                lock (_positionLock)
+                {
+                    return _position;
+                }
+            }
             set
             {
-                if (value is Vector vector)
+                lock (_positionLock)
                 {
-                    _position = vector;
-                    RaiseNewPositionChangeNotification();
-                }
-                else
-                {
-                    throw new ArgumentException("Position must be of type Vector");
+                    if (value is Vector vector)
+                    {
+                        _position = vector;
+                        RaiseNewPositionChangeNotification();
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Position must be of type Vector");
+                    }
                 }
             }
         }
@@ -53,25 +86,72 @@ namespace TP.ConcurrentProgramming.Data
         {
             get => _tableHeight;
         }
+
+        public void Dispose()
+        {
+            if (_disposed) return; // Zabezpieczenie przed wielokrotnym wywołaniem Dispose
+            _disposed = true;
+
+            _cts.Cancel(); // Anulujemy zadanie
+            if (_moveTask != null)
+            {
+                try
+                {
+                    _moveTask.Wait(); // Czekamy na zakończenie zadania
+                }
+                catch (AggregateException)
+                {
+                    // Ignorujemy wyjątki, jeśli zadanie zostało anulowane
+                }
+            }
+            _cts.Dispose(); // Teraz bezpiecznie utylizujemy _cts
+        }
         #endregion
 
         #region private
         private readonly double _tableWidth;
         private readonly double _tableHeight;
         private Vector _position;
+        private Vector _velocity;
+        private readonly object _positionLock = new object();
+        private readonly object _velocityLock = new object();
+        private readonly CancellationTokenSource _cts;
+        private Task _moveTask;
+        private bool _disposed = false;
 
         private void RaiseNewPositionChangeNotification()
         {
             NewPositionNotification?.Invoke(this, _position);
         }
 
-        internal void Move(Vector delta)
+        private void Move(Vector delta)
         {
             double newX = _position.x + delta.x;
             double newY = _position.y + delta.y;
 
             _position = new Vector(newX, newY);
             RaiseNewPositionChangeNotification();
+        }
+        internal void StartMoving()
+        {
+            _moveTask = Task.Run(() => RunAsync(_cts.Token), _cts.Token);
+        }
+
+        private async Task RunAsync(CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                lock (_velocityLock)
+                {
+                    lock (_positionLock)
+                    {
+                        Move(_velocity); // Wywołujemy Move z aktualną prędkością
+                    }
+                }
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+                await Task.Delay(10); // Opóźnienie 10 ms
+            }
         }
         #endregion
     }

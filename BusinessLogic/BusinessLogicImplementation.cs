@@ -23,8 +23,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
         {
             layerBellow = underneathLayer ?? UnderneathLayerAPI.GetDataLayer();
-            _cancellationTokenSource = new CancellationTokenSource();
-            CollisionTask = Task.Run(() => DetectCollisionsAsync(_cancellationTokenSource.Token), _cancellationTokenSource.Token);
+            //_cancellationTokenSource = new CancellationTokenSource();
+            //CollisionTask = Task.Run(() => DetectCollisionsAsync(_cancellationTokenSource.Token), _cancellationTokenSource.Token);
         }
         #endregion
 
@@ -33,10 +33,15 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         {
             if (Disposed)
                 throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
-            _cancellationTokenSource.Cancel();
+            lock (_lock)
+            {
+                foreach (var ball in BallsList)
+                {
+                    ball.Dispose(); // Nowe: Wywołujemy Dispose na każdej kulce, aby anulować jej zadania
+                }
+                BallsList.Clear();
+            }
             layerBellow.Dispose();
-            BallsList.Clear();
-            _cancellationTokenSource.Dispose();
             Disposed = true;
         }
 
@@ -49,10 +54,10 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
             layerBellow.Start(numberOfBalls, tableWidth, tableHeight, (startingPosition, databall) =>
             {
-                Ball logicBall = new Ball(databall);
-                upperLayerHandler(new Position(startingPosition.x, startingPosition.y), logicBall);
                 lock (_lock)
                 {
+                    Ball logicBall = new Ball(databall, BallsList, _lock);
+                    upperLayerHandler(new Position(startingPosition.x, startingPosition.y), logicBall);
                     BallsList.Add(logicBall);
                 }
             });
@@ -62,51 +67,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         #region private
         private bool Disposed = false;
         private readonly UnderneathLayerAPI layerBellow;
-        private readonly Task? CollisionTask;
-        private readonly CancellationTokenSource _cancellationTokenSource;
         private readonly List<Ball> BallsList = [];
         private readonly object _lock = new();
 
-        private async Task DetectCollisionsAsync(CancellationToken cancellationToken)
-        {
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                lock (_lock)
-                {
-                    var ballsCopy = BallsList.ToList();
-                    bool collisionDetected;
-                    do
-                    {
-                        collisionDetected = false;
-                        // Kolizje między kulkami
-                        for (int i = 0; i < ballsCopy.Count; i++)
-                        {
-                            for (int j = i + 1; j < ballsCopy.Count; j++)
-                            {
-                                Ball ball1 = ballsCopy[i];
-                                Ball ball2 = ballsCopy[j];
-                                double dx = ball1.DataBall.Position.x - ball2.DataBall.Position.x;
-                                double dy = ball1.DataBall.Position.y - ball2.DataBall.Position.y;
-                                double distance = Math.Sqrt(dx * dx + dy * dy);
-                                if (distance < ball1.Radius + ball2.Radius)
-                                {
-                                    ball1.CollideWith(ball2);
-                                    collisionDetected = true;
-                                }
-                            }
-                        }
-                        // Kolizje ze ściankami
-                        foreach (var ball in ballsCopy)
-                        {
-                            ball.CheckWallCollisions();
-                        }
-                    } while (collisionDetected); // Powtarzaj, aż nie będzie kolizji
-                }
-                if (cancellationToken.IsCancellationRequested)
-                    break;
-                await Task.Delay(10);
-            }
-        }
         #endregion
 
         #region TestingInfrastructure
