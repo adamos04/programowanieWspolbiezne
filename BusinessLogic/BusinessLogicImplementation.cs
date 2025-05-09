@@ -33,13 +33,15 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         {
             if (Disposed)
                 throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
+            Ball[] ballsToDispose;
             lock (_lock)
             {
-                foreach (var ball in BallsList)
-                {
-                    ball.Dispose(); // Nowe: Wywołujemy Dispose na każdej kulce, aby anulować jej zadania
-                }
+                ballsToDispose = BallsList.ToArray();
                 BallsList.Clear();
+            }
+            foreach (var ball in ballsToDispose)
+            {
+                ball.Dispose();
             }
             layerBellow.Dispose();
             Disposed = true;
