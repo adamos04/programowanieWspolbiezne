@@ -29,25 +29,16 @@ namespace TP.ConcurrentProgramming.Data
         public event EventHandler<IVector>? NewPositionNotification;
         public IVector Velocity
         {
-            get
-            {
-                lock (_velocityLock)
-                {
-                    return _velocity;
-                }
-            }
+            get => new Vector(_velocity.x, _velocity.y);
             set
             {
-                lock (_velocityLock)
+                if (value is Vector vector)
                 {
-                    if (value is Vector vector)
-                    {
-                        _velocity = vector;
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Velocity must be of type Vector");
-                    }
+                    _velocity = vector;
+                }
+                else
+                {
+                    throw new ArgumentException("Velocity must be of type Vector");
                 }
             }
         }
@@ -55,26 +46,17 @@ namespace TP.ConcurrentProgramming.Data
         public double Radius { get; }
         public IVector Position
         {
-            get
-            {
-                lock (_positionLock)
-                {
-                    return _position;
-                }
-            }
+            get => new Vector(_position.x, _position.y);
             set
             {
-                lock (_positionLock)
+                if (value is Vector vector)
                 {
-                    if (value is Vector vector)
-                    {
-                        _position = vector;
-                        RaiseNewPositionChangeNotification();
-                    }
-                    else
-                    {
-                        throw new ArgumentException("Position must be of type Vector");
-                    }
+                    _position = vector;
+                    RaiseNewPositionChangeNotification();
+                }
+                else
+                {
+                    throw new ArgumentException("Position must be of type Vector");
                 }
             }
         }
@@ -113,8 +95,6 @@ namespace TP.ConcurrentProgramming.Data
         private readonly double _tableHeight;
         private Vector _position;
         private Vector _velocity;
-        private readonly object _positionLock = new object();
-        private readonly object _velocityLock = new object();
         private readonly CancellationTokenSource _cts;
         private Task _moveTask;
         private bool _disposed = false;
@@ -141,16 +121,19 @@ namespace TP.ConcurrentProgramming.Data
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                lock (_velocityLock)
+                try
                 {
-                    lock (_positionLock)
-                    {
-                        Move(_velocity); // Wywołujemy Move z aktualną prędkością
-                    }
+                    Move(_velocity);
+                    await Task.Delay(10, cancellationToken);
                 }
-                if (cancellationToken.IsCancellationRequested)
+                catch (TaskCanceledException)
+                {
                     break;
-                await Task.Delay(10); // Opóźnienie 10 ms
+                }
+                catch (Exception)
+                {
+                    break;
+                }
             }
         }
         #endregion
