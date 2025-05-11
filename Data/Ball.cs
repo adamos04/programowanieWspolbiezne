@@ -16,12 +16,13 @@ namespace TP.ConcurrentProgramming.Data
         internal Ball(Vector initialPosition, Vector initialVelocity, double tableWidth, double tableHeight, double radius)
         {
             _position = initialPosition;
-            Velocity = initialVelocity;
+            _velocity = initialVelocity;
             _tableWidth = tableWidth;
             _tableHeight = tableHeight;
             Mass = new Random().NextDouble() * 3 + 3;
             Radius = radius;
-            _cts = new CancellationTokenSource();
+            _isRunning = true;
+            _moveThread = null!;
         }
         #endregion
 
@@ -71,22 +72,11 @@ namespace TP.ConcurrentProgramming.Data
 
         public void Dispose()
         {
-            if (_disposed) return; // Zabezpieczenie przed wielokrotnym wywołaniem Dispose
+            if (_disposed) return;
             _disposed = true;
 
-            _cts.Cancel(); // Anulujemy zadanie
-            if (_moveTask != null)
-            {
-                try
-                {
-                    _moveTask.Wait(); // Czekamy na zakończenie zadania
-                }
-                catch (AggregateException)
-                {
-                    // Ignorujemy wyjątki, jeśli zadanie zostało anulowane
-                }
-            }
-            _cts.Dispose(); // Teraz bezpiecznie utylizujemy _cts
+            _isRunning = false;
+            _moveThread?.Join();
         }
         #endregion
 
@@ -95,8 +85,8 @@ namespace TP.ConcurrentProgramming.Data
         private readonly double _tableHeight;
         private Vector _position;
         private Vector _velocity;
-        private readonly CancellationTokenSource _cts;
-        private Task _moveTask;
+        private Thread? _moveThread;
+        private volatile bool _isRunning;
         private bool _disposed = false;
 
         private void RaiseNewPositionChangeNotification()
@@ -112,28 +102,20 @@ namespace TP.ConcurrentProgramming.Data
             _position = new Vector(newX, newY);
             RaiseNewPositionChangeNotification();
         }
+
         internal void StartMoving()
         {
-            _moveTask = Task.Run(() => RunAsync(_cts.Token), _cts.Token);
+            _moveThread = new Thread(new ThreadStart(MoveContinuously));
+            _moveThread.IsBackground = true;
+            _moveThread.Start();
         }
 
-        private async Task RunAsync(CancellationToken cancellationToken)
+        private void MoveContinuously()
         {
-            while (!cancellationToken.IsCancellationRequested)
+            while (_isRunning)
             {
-                try
-                {
-                    Move(_velocity);
-                    await Task.Delay(10, cancellationToken);
-                }
-                catch (TaskCanceledException)
-                {
-                    break;
-                }
-                catch (Exception)
-                {
-                    break;
-                }
+                Move(_velocity);
+                Thread.Sleep(10);
             }
         }
         #endregion

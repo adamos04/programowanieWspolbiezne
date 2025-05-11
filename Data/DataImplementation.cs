@@ -24,34 +24,34 @@ namespace TP.ConcurrentProgramming.Data
 
         #region DataAbstractAPI
         public override void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, IBall> upperLayerHandler)
+{
+    if (Disposed)
+        throw new ObjectDisposedException(nameof(DataImplementation));
+    if (upperLayerHandler == null)
+        throw new ArgumentNullException(nameof(upperLayerHandler));
+
+    double minDimension = Math.Min(tableWidth, tableHeight);
+    double radius = 0.04 * tableHeight;
+
+    Random random = new Random();
+    for (int i = 0; i < numberOfBalls; i++)
+    {
+        double x = radius + random.NextDouble() * (tableWidth - 2 * radius);
+        double y = radius + random.NextDouble() * (tableHeight - 2 * radius);
+        Vector startingPosition = new(x, y);
+        Vector velocity = new Vector((random.NextDouble() - 0.5) * 5, (random.NextDouble() - 0.5) * 5);
+        Ball newBall = new(startingPosition, velocity, tableWidth, tableHeight, radius);
+        upperLayerHandler(startingPosition, newBall);
+        if (newBall is Ball ballImplementation)
         {
-            if (Disposed)
-                throw new ObjectDisposedException(nameof(DataImplementation));
-            if (upperLayerHandler == null)
-                throw new ArgumentNullException(nameof(upperLayerHandler));
-
-            double minDimension = Math.Min(tableWidth, tableHeight);
-            double radius = 0.04 * tableHeight;
-
-            Random random = new Random();
-            for (int i = 0; i < numberOfBalls; i++)
-            {
-                double x = radius + random.NextDouble() * (tableWidth - 2 * radius);
-                double y = radius + random.NextDouble() * (tableHeight - 2 * radius);
-                Vector startingPosition = new(x, y);
-                Vector velocity = new Vector((random.NextDouble() - 0.5) * 5, (random.NextDouble() - 0.5) * 5);
-                Ball newBall = new(startingPosition, velocity, tableWidth, tableHeight, radius);
-                upperLayerHandler(startingPosition, newBall);
-                if (newBall is Ball ballImplementation)
-                {
-                    ballImplementation.StartMoving();
-                }
-                lock (_lock)
-                {
-                    BallsList.Add(newBall);
-                }
-            }
+            ballImplementation.StartMoving();
         }
+        lock (_lock)
+        {
+            BallsList.Add(newBall);
+        }
+    }
+}
         #endregion
 
         #region IDisposable
