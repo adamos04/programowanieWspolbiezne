@@ -88,12 +88,11 @@ namespace TP.ConcurrentProgramming.Presentation.Model
 
         private string GetColorForMass(double mass)
         {
-            if (mass < 0 || mass > 5)
-                throw new ArgumentOutOfRangeException("Mass must be between 0 and 5");
+            if (mass < 3 || mass > 6)
+                throw new ArgumentOutOfRangeException("Mass must be between 3 and 6");
 
-
-            int red = (int)(255 - 35 * mass);
-            int greenBlue = (int)(200 * (1 - mass / 5));
+            int red = (int)(255 - 35 * (mass - 3));
+            int greenBlue = (int)(200 * (1 - (mass - 3) / 3));
             string hexColor = $"#{red:X2}{greenBlue:X2}{greenBlue:X2}";
 
             return hexColor;

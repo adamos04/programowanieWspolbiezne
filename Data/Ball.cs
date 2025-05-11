@@ -19,7 +19,7 @@ namespace TP.ConcurrentProgramming.Data
             Velocity = initialVelocity;
             _tableWidth = tableWidth;
             _tableHeight = tableHeight;
-            Mass = new Random().NextDouble() * 5 + double.Epsilon;
+            Mass = new Random().NextDouble() * 3 + 3;
             Radius = radius;
             _cts = new CancellationTokenSource();
         }
