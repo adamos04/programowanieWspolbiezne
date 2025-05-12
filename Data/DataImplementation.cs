@@ -14,14 +14,6 @@ namespace TP.ConcurrentProgramming.Data
 {
     internal class DataImplementation : DataAbstractAPI
     {
-        #region ctor
-        public DataImplementation()
-        {
-            //_cancellationTokenSource = new CancellationTokenSource();
-            //MoveTask = Task.Run(() => MoveAsync(_cancellationTokenSource.Token), _cancellationTokenSource.Token);
-        }
-        #endregion
-
         #region DataAbstractAPI
         public override void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, IBall> upperLayerHandler)
 {

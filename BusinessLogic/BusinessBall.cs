@@ -33,20 +33,20 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         public void Dispose()
         {
-            if (_disposed) return; // Zabezpieczenie przed wielokrotnym wywołaniem Dispose
+            if (_disposed) return;
             _disposed = true;
 
-            _collisionCts.Cancel(); // Anulujemy zadanie
+            _collisionCts.Cancel();
             try
             {
-                _collisionTask.Wait(); // Czekamy na zakończenie zadania
+                _collisionTask.Wait();
             }
             catch (AggregateException)
             {
-                // Ignorujemy wyjątki, jeśli zadanie zostało anulowane
+                
             }
-            _collisionCts.Dispose(); // Teraz bezpiecznie utylizujemy _collisionCts
-            _dataBall.Dispose(); // Wywołujemy Dispose na Data.Ball
+            _collisionCts.Dispose();
+            _dataBall.Dispose();
         }
         #endregion
 
@@ -69,19 +69,16 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             double m2 = other.Mass;
             double factor = 2 * m2 / (m1 + m2) * dot / (dx.x * dx.x + dx.y * dx.y);
 
-            // Aktualizacja prędkości
             _dataBall.Velocity = new Data.Vector(v1.x - factor * dx.x, v1.y - factor * dx.y);
             other._dataBall.Velocity = new Data.Vector(v2.x + factor * dx.x * m1 / m2, v2.y + factor * dx.y * m1 / m2);
 
-            // Korekta pozycji, aby kulki się nie przenikały
             double distance = Math.Sqrt(dx.x * dx.x + dx.y * dx.y);
             double overlap = (Radius + other.Radius) - distance;
             if (overlap > 0)
             {
-                // Normalizacja wektora dx
                 double nx = dx.x / distance;
                 double ny = dx.y / distance;
-                // Przesunięcie kulek proporcjonalnie do ich mas
+
                 double correctionFactor = overlap / (m1 + m2);
                 _dataBall.Position = new Data.Vector(x1.x + nx * correctionFactor * m2, x1.y + ny * correctionFactor * m2);
                 other._dataBall.Position = new Data.Vector(x2.x - nx * correctionFactor * m1, x2.y - ny * correctionFactor * m1);
@@ -96,7 +93,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             double tableWidth = _dataBall.TableWidth;
             double tableHeight = _dataBall.TableHeight;
 
-            // Korekta pozycji w przypadku przeniknięcia
             if (newX - Radius < 0)
             {
                 newX = Radius;
@@ -118,7 +114,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 _dataBall.Velocity = new Data.Vector(_dataBall.Velocity.x, -_dataBall.Velocity.y);
             }
 
-            // Bezwarunkowa aktualizacja pozycji, jeśli zmieniono newX lub newY
             _dataBall.Position = new Data.Vector(newX, newY);
         }
         #endregion
@@ -135,10 +130,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                // Sprawdzenie kolizji ze ściankami
                 CheckWallCollisions();
 
-                // Sprawdzenie kolizji z innymi kulkami
                 lock (_lock)
                 {
                     foreach (var otherBall in _otherBalls)
@@ -155,7 +148,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 }
                 if (cancellationToken.IsCancellationRequested)
                     break;
-                await Task.Delay(10); // Opóźnienie 10 ms
+                await Task.Delay(10);
                 
             }
         }

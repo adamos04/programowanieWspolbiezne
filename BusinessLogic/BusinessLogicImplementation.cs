@@ -23,8 +23,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
         {
             layerBellow = underneathLayer ?? UnderneathLayerAPI.GetDataLayer();
-            //_cancellationTokenSource = new CancellationTokenSource();
-            //CollisionTask = Task.Run(() => DetectCollisionsAsync(_cancellationTokenSource.Token), _cancellationTokenSource.Token);
         }
         #endregion
 
