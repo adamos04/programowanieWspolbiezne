@@ -132,6 +132,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
                     public double x { get; init; } = 0.0;
                     public double y { get; init; } = 0.0;
                 }
+                public void Dispose()
+                {
+                }
             }
         }
 

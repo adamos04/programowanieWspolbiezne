@@ -27,10 +27,17 @@ namespace TP.ConcurrentProgramming.Data.Test
             Ball newInstance = new(initialPosition, new Vector(0.0, 0.0), 100, 100, 10.0);
             IVector curentPosition = new Vector(0.0, 0.0);
             int numberOfCallBackCalled = 0;
-            newInstance.NewPositionNotification += (sender, position) => { Assert.IsNotNull(sender); curentPosition = position; numberOfCallBackCalled++; };
-            newInstance.Move(new Vector(0.0, 0.0));
-            Assert.AreEqual<int>(1, numberOfCallBackCalled);
-            Assert.AreEqual<IVector>(initialPosition, curentPosition);
+            newInstance.NewPositionNotification += (sender, position) =>
+            {
+                Assert.IsNotNull(sender);
+                curentPosition = position;
+                numberOfCallBackCalled++;
+            };
+            newInstance.StartMoving();
+            Thread.Sleep(50);
+            Assert.AreEqual(initialPosition.x, curentPosition.x, 0.001);
+            Assert.AreEqual(initialPosition.y, curentPosition.y, 0.001);
+            newInstance.Dispose();
         }
     }
 }

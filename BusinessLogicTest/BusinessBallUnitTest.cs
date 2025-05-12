@@ -17,11 +17,20 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
         public void MoveTestMethod()
         {
             DataBallFixture dataBallFixture = new DataBallFixture();
-            Ball newInstance = new(dataBallFixture);
+            List<Ball> otherBalls = new List<Ball>();
+            object sharedLock = new object();
+            Ball newInstance = new(dataBallFixture, otherBalls, sharedLock);
             int numberOfCallBackCalled = 0;
-            newInstance.NewPositionNotification += (sender, position) => { Assert.IsNotNull(sender); Assert.IsNotNull(position); numberOfCallBackCalled++; };
+            newInstance.NewPositionNotification += (sender, position) =>
+            {
+                Assert.IsNotNull(sender);
+                Assert.IsNotNull(position);
+                numberOfCallBackCalled++;
+            };
             dataBallFixture.Move();
+            Thread.Sleep(20);
             Assert.AreEqual<int>(1, numberOfCallBackCalled);
+            newInstance.Dispose();
         }
 
         #region testing instrumentation
@@ -36,6 +45,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             public double TableHeight { get => throw new NotImplementedException(); }
 
             public event EventHandler<Data.IVector>? NewPositionNotification;
+            public void Dispose()
+            {
+            }
 
             internal void Move()
             {
