@@ -30,15 +30,14 @@ namespace TP.ConcurrentProgramming.Data
         double y { get; init; }
     }
 
-    public interface IBall
+    public interface IBall :IDisposable
     {
         event EventHandler<IVector> NewPositionNotification;
         IVector Velocity { get; set; }
         double Radius { get; }
         double Mass { get; }
-        IVector Position { get; set; } 
+        IVector Position { get; } 
         double TableWidth { get; }
         double TableHeight { get; }
-        void Dispose();
     }
 }

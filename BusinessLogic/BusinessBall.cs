@@ -43,7 +43,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             }
             catch (AggregateException)
             {
-                
             }
             _collisionCts.Dispose();
             _dataBall.Dispose();
@@ -71,18 +70,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
             _dataBall.Velocity = new Data.Vector(v1.x - factor * dx.x, v1.y - factor * dx.y);
             other._dataBall.Velocity = new Data.Vector(v2.x + factor * dx.x * m1 / m2, v2.y + factor * dx.y * m1 / m2);
-
-            double distance = Math.Sqrt(dx.x * dx.x + dx.y * dx.y);
-            double overlap = (Radius + other.Radius) - distance;
-            if (overlap > 0)
-            {
-                double nx = dx.x / distance;
-                double ny = dx.y / distance;
-
-                double correctionFactor = overlap / (m1 + m2);
-                _dataBall.Position = new Data.Vector(x1.x + nx * correctionFactor * m2, x1.y + ny * correctionFactor * m2);
-                other._dataBall.Position = new Data.Vector(x2.x - nx * correctionFactor * m1, x2.y - ny * correctionFactor * m1);
-            }
         }
 
         internal void CheckWallCollisions()
@@ -92,29 +79,35 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             double newY = _dataBall.Position.y;
             double tableWidth = _dataBall.TableWidth;
             double tableHeight = _dataBall.TableHeight;
+            Data.Vector velocity = (Data.Vector)_dataBall.Velocity;
+            bool velocityChanged = false;
 
-            if (newX - Radius < 0)
+            if (newX - Radius <= 0 && velocity.x < 0)
             {
-                newX = Radius;
-                _dataBall.Velocity = new Data.Vector(-_dataBall.Velocity.x, _dataBall.Velocity.y);
-            }
-            else if (newX + Radius > tableWidth - borderThickness)
-            {
-                newX = tableWidth - borderThickness - Radius;
-                _dataBall.Velocity = new Data.Vector(-_dataBall.Velocity.x, _dataBall.Velocity.y);
-            }
-            if (newY - Radius < 0)
-            {
-                newY = Radius;
-                _dataBall.Velocity = new Data.Vector(_dataBall.Velocity.x, -_dataBall.Velocity.y);
-            }
-            else if (newY + Radius > tableHeight - borderThickness)
-            {
-                newY = tableHeight - borderThickness - Radius;
-                _dataBall.Velocity = new Data.Vector(_dataBall.Velocity.x, -_dataBall.Velocity.y);
+                velocity = new Data.Vector(-velocity.x, velocity.y);
+                velocityChanged = true;
             }
 
-            _dataBall.Position = new Data.Vector(newX, newY);
+            else if (newX + Radius >= tableWidth - borderThickness && velocity.x > 0)
+            {
+                velocity = new Data.Vector(-velocity.x, velocity.y);
+                velocityChanged = true;
+            }
+            if (newY - Radius <= 0 && velocity.y < 0)
+            {
+                velocity = new Data.Vector(velocity.x, -velocity.y);
+                velocityChanged = true;
+            }
+            else if (newY + Radius >= tableHeight - borderThickness && velocity.y > 0)
+            {
+                velocity = new Data.Vector(velocity.x, -velocity.y);
+                velocityChanged = true;
+            }
+
+            if (velocityChanged)
+            {
+                _dataBall.Velocity = velocity;
+            }
         }
         #endregion
 
@@ -140,7 +133,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                         double dx = _dataBall.Position.x - otherBall.DataBall.Position.x;
                         double dy = _dataBall.Position.y - otherBall.DataBall.Position.y;
                         double distance = Math.Sqrt(dx * dx + dy * dy);
-                        if (distance < Radius + otherBall.Radius)
+                        if (distance <= Radius + otherBall.Radius)
                         {
                             CollideWith(otherBall);
                         }
@@ -149,7 +142,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 if (cancellationToken.IsCancellationRequested)
                     break;
                 await Task.Delay(10);
-                
+
             }
         }
 

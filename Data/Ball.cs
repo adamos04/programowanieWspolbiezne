@@ -30,37 +30,20 @@ namespace TP.ConcurrentProgramming.Data
         public event EventHandler<IVector>? NewPositionNotification;
         public IVector Velocity
         {
-            get => new Vector(_velocity.x, _velocity.y);
+            get
+            {
+                return _velocity;
+            }
             set
             {
-                if (value is Vector vector)
-                {
-                    _velocity = vector;
-                }
-                else
-                {
-                    throw new ArgumentException("Velocity must be of type Vector");
-                }
+                _velocity = (Vector)value;
             }
         }
+
         public double Mass { get; }
         public double Radius { get; }
-        public IVector Position
-        {
-            get => new Vector(_position.x, _position.y);
-            set
-            {
-                if (value is Vector vector)
-                {
-                    _position = vector;
-                    RaiseNewPositionChangeNotification();
-                }
-                else
-                {
-                    throw new ArgumentException("Position must be of type Vector");
-                }
-            }
-        }
+        public IVector Position => _position;
+
         public double TableWidth
         {
             get => _tableWidth;
@@ -94,12 +77,10 @@ namespace TP.ConcurrentProgramming.Data
             NewPositionNotification?.Invoke(this, _position);
         }
 
-        private void Move(Vector delta)
+        private void Move()
         {
-            double newX = _position.x + delta.x;
-            double newY = _position.y + delta.y;
-
-            _position = new Vector(newX, newY);
+            Vector velocity = (Vector)Velocity;
+            _position = new Vector(_position.x + velocity.x, _position.y + velocity.y);
             RaiseNewPositionChangeNotification();
         }
 
@@ -114,7 +95,7 @@ namespace TP.ConcurrentProgramming.Data
         {
             while (_isRunning)
             {
-                Move(_velocity);
+                Move();
                 Thread.Sleep(10);
             }
         }
