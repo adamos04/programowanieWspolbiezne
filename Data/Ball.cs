@@ -96,7 +96,12 @@ namespace TP.ConcurrentProgramming.Data
             while (_isRunning)
             {
                 Move();
-                Thread.Sleep(10);
+                double speed;
+                
+                speed = Math.Sqrt(_velocity.x * _velocity.x + _velocity.y * _velocity.y);
+                
+                int delay = (int)Math.Clamp(1000 / (speed * 40), 10, 30);
+                Thread.Sleep(delay);
             }
         }
         #endregion
