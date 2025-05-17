@@ -16,34 +16,67 @@ namespace TP.ConcurrentProgramming.Data
     {
         #region DataAbstractAPI
         public override void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, IBall> upperLayerHandler)
-{
-    if (Disposed)
-        throw new ObjectDisposedException(nameof(DataImplementation));
-    if (upperLayerHandler == null)
-        throw new ArgumentNullException(nameof(upperLayerHandler));
-
-    double minDimension = Math.Min(tableWidth, tableHeight);
-    double radius = 0.04 * tableHeight;
-
-    Random random = new Random();
-    for (int i = 0; i < numberOfBalls; i++)
-    {
-        double x = radius + random.NextDouble() * (tableWidth - 2 * radius - 30);
-        double y = radius + random.NextDouble() * (tableHeight - 2 * radius - 30);
-        Vector startingPosition = new(x, y);
-        Vector velocity = new Vector((random.NextDouble() - 0.5) * 5, (random.NextDouble() - 0.5) * 5);
-        Ball newBall = new(startingPosition, velocity, tableWidth, tableHeight, radius);
-        upperLayerHandler(startingPosition, newBall);
-        if (newBall is Ball ballImplementation)
         {
-            ballImplementation.StartMoving();
+            if (Disposed)
+                throw new ObjectDisposedException(nameof(DataImplementation));
+            if (upperLayerHandler == null)
+                throw new ArgumentNullException(nameof(upperLayerHandler));
+
+            double minDimension = Math.Min(tableWidth, tableHeight);
+            double radius = 0.04 * tableHeight;
+
+            Random random = new Random();
+            List<Ball> tempBalls = new List<Ball>();
+
+            for (int i = 0; i < numberOfBalls; i++)
+            {
+                bool positionValid;
+                Vector startingPosition;
+                int maxAttempts = 100;
+                int attempts = 0;
+                do
+                {
+                    double x = radius + random.NextDouble() * (tableWidth - 2 * radius);
+                    double y = radius + random.NextDouble() * (tableHeight - 2 * radius);
+                    startingPosition = new Vector(x, y);
+
+                    positionValid = true;
+                    foreach (var existingBall in tempBalls)
+                    {
+                        double distance = Math.Sqrt(
+                            Math.Pow(startingPosition.x - existingBall.Position.x, 2) +
+                            Math.Pow(startingPosition.y - existingBall.Position.y, 2)
+                        );
+                        if (distance < 2 * radius)
+                        {
+                            positionValid = false;
+                            break;
+                        }
+                    }
+
+                    attempts++;
+                    if (attempts >= maxAttempts)
+                    {
+                        throw new InvalidOperationException("Could not find a non-overlapping position for a ball after maximum attempts.");
+                    }
+                } while (!positionValid);
+
+
+                Vector velocity = new Vector((random.NextDouble() - 0.5) * 5, (random.NextDouble() - 0.5) * 5);
+                Ball newBall = new Ball(startingPosition, velocity, tableWidth, tableHeight, radius);
+                upperLayerHandler(startingPosition, newBall);
+                if (newBall is Ball ballImplementation)
+                {
+                    ballImplementation.StartMoving();
+                }
+                tempBalls.Add(newBall);
+            }
+
+            lock (_lock)
+            {
+                BallsList.AddRange(tempBalls);
+            }
         }
-        lock (_lock)
-        {
-            BallsList.Add(newBall);
-        }
-    }
-}
         #endregion
 
         #region IDisposable
