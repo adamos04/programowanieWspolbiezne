@@ -56,7 +56,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             {
                 lock (_lock)
                 {
-                    Ball logicBall = new Ball(databall, BallsList, _lock);
+                    Ball logicBall = new Ball(databall, BallsList, _lock, tableWidth, tableHeight);
                     upperLayerHandler(new Position(startingPosition.x, startingPosition.y), logicBall);
                     BallsList.Add(logicBall);
                 }

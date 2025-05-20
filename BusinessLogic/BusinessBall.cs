@@ -12,11 +12,13 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 {
     internal class Ball : IBall
     {
-        public Ball(Data.IBall ball, List<Ball> otherBalls, object sharedLock)
+        public Ball(Data.IBall ball, List<Ball> otherBalls, object sharedLock, double tableWidth, double tableHeight)
         {
             _dataBall = ball;
             _otherBalls = otherBalls;
             _lock = sharedLock;
+            _tableWidth = tableWidth;
+            _tableHeight = tableHeight;
             _dataBall.NewPositionNotification += RaisePositionChangeEvent;
             _collisionCts = new CancellationTokenSource();
             _collisionTask = Task.Run(() => DetectCollisionsAsync(_collisionCts.Token), _collisionCts.Token);
@@ -77,8 +79,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             double borderThickness = 8.0;
             double newX = _dataBall.Position.x;
             double newY = _dataBall.Position.y;
-            double tableWidth = _dataBall.TableWidth;
-            double tableHeight = _dataBall.TableHeight;
             Data.Vector velocity = (Data.Vector)_dataBall.Velocity;
             bool velocityChanged = false;
 
@@ -87,8 +87,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 velocity = new Data.Vector(-velocity.x, velocity.y);
                 velocityChanged = true;
             }
-
-            else if (newX + Radius >= tableWidth - borderThickness && velocity.x > 0)
+            else if (newX + Radius >= _tableWidth - borderThickness && velocity.x > 0)
             {
                 velocity = new Data.Vector(-velocity.x, velocity.y);
                 velocityChanged = true;
@@ -98,7 +97,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 velocity = new Data.Vector(velocity.x, -velocity.y);
                 velocityChanged = true;
             }
-            else if (newY + Radius >= tableHeight - borderThickness && velocity.y > 0)
+            else if (newY + Radius >= _tableHeight - borderThickness && velocity.y > 0)
             {
                 velocity = new Data.Vector(velocity.x, -velocity.y);
                 velocityChanged = true;
@@ -115,6 +114,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         private readonly Data.IBall _dataBall;
         private readonly List<Ball> _otherBalls;
         private readonly object _lock;
+        private readonly double _tableWidth;
+        private readonly double _tableHeight;
         private readonly Task _collisionTask;
         private readonly CancellationTokenSource _collisionCts;
         private bool _disposed = false;

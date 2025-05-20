@@ -36,8 +36,6 @@ namespace TP.ConcurrentProgramming.Data
         IVector Velocity { get; set; }
         double Radius { get; }
         double Mass { get; }
-        IVector Position { get; } 
-        double TableWidth { get; }
-        double TableHeight { get; }
+        IVector Position { get; }
     }
 }

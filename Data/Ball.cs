@@ -13,12 +13,10 @@ namespace TP.ConcurrentProgramming.Data
     internal class Ball : IBall
     {
         #region ctor
-        internal Ball(Vector initialPosition, Vector initialVelocity, double tableWidth, double tableHeight, double radius)
+        internal Ball(Vector initialPosition, Vector initialVelocity, double radius)
         {
             _position = initialPosition;
             _velocity = initialVelocity;
-            _tableWidth = tableWidth;
-            _tableHeight = tableHeight;
             Mass = new Random().NextDouble() * 3 + 3;
             Radius = radius;
             _isRunning = true;
@@ -30,28 +28,13 @@ namespace TP.ConcurrentProgramming.Data
         public event EventHandler<IVector>? NewPositionNotification;
         public IVector Velocity
         {
-            get
-            {
-                return _velocity;
-            }
-            set
-            {
-                _velocity = (Vector)value;
-            }
+            get => _velocity;
+            set => _velocity = (Vector)value;
         }
 
         public double Mass { get; }
         public double Radius { get; }
         public IVector Position => _position;
-
-        public double TableWidth
-        {
-            get => _tableWidth;
-        }
-        public double TableHeight
-        {
-            get => _tableHeight;
-        }
 
         public void Dispose()
         {
@@ -64,8 +47,6 @@ namespace TP.ConcurrentProgramming.Data
         #endregion
 
         #region private
-        private readonly double _tableWidth;
-        private readonly double _tableHeight;
         private Vector _position;
         private Vector _velocity;
         private Thread? _moveThread;
@@ -96,10 +77,7 @@ namespace TP.ConcurrentProgramming.Data
             while (_isRunning)
             {
                 Move();
-                double speed;
-                
-                speed = Math.Sqrt(_velocity.x * _velocity.x + _velocity.y * _velocity.y);
-                
+                double speed = Math.Sqrt(_velocity.x * _velocity.x + _velocity.y * _velocity.y);
                 int delay = (int)Math.Clamp(1000 / (speed * 40), 10, 30);
                 Thread.Sleep(delay);
             }
