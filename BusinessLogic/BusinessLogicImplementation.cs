@@ -52,11 +52,13 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             if (upperLayerHandler == null)
                 throw new ArgumentNullException(nameof(upperLayerHandler));
 
+            double radius = 0.04 * tableHeight;
+
             layerBellow.Start(numberOfBalls, tableWidth, tableHeight, (startingPosition, databall) =>
             {
                 lock (_lock)
                 {
-                    Ball logicBall = new Ball(databall, BallsList, _lock, tableWidth, tableHeight);
+                    Ball logicBall = new Ball(databall, BallsList, _lock, tableWidth, tableHeight, radius);
                     upperLayerHandler(new Position(startingPosition.x, startingPosition.y), logicBall);
                     BallsList.Add(logicBall);
                 }

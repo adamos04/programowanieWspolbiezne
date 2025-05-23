@@ -13,12 +13,11 @@ namespace TP.ConcurrentProgramming.Data
     internal class Ball : IBall
     {
         #region ctor
-        internal Ball(Vector initialPosition, Vector initialVelocity, double radius)
+        internal Ball(Vector initialPosition, Vector initialVelocity)
         {
             _position = initialPosition;
             _velocity = initialVelocity;
             Mass = new Random().NextDouble() * 3 + 3;
-            Radius = radius;
             _isRunning = true;
             _moveThread = null!;
         }
@@ -33,7 +32,6 @@ namespace TP.ConcurrentProgramming.Data
         }
 
         public double Mass { get; }
-        public double Radius { get; }
         public IVector Position => _position;
 
         public void Dispose()

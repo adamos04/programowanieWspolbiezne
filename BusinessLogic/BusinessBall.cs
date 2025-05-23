@@ -12,13 +12,14 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 {
     internal class Ball : IBall
     {
-        public Ball(Data.IBall ball, List<Ball> otherBalls, object sharedLock, double tableWidth, double tableHeight)
+        public Ball(Data.IBall ball, List<Ball> otherBalls, object sharedLock, double tableWidth, double tableHeight, double radius)
         {
             _dataBall = ball;
             _otherBalls = otherBalls;
             _lock = sharedLock;
             _tableWidth = tableWidth;
             _tableHeight = tableHeight;
+            _radius = radius;
             _dataBall.NewPositionNotification += RaisePositionChangeEvent;
             _collisionCts = new CancellationTokenSource();
             _collisionTask = Task.Run(() => DetectCollisionsAsync(_collisionCts.Token), _collisionCts.Token);
@@ -26,7 +27,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         #region IBall
         public event EventHandler<IPosition>? NewPositionNotification;
-        public double Radius => _dataBall.Radius;
+        public double Radius => _radius;
         public double Mass => _dataBall.Mass;
         #endregion
 
@@ -116,6 +117,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         private readonly object _lock;
         private readonly double _tableWidth;
         private readonly double _tableHeight;
+        private readonly double _radius;
         private readonly Task _collisionTask;
         private readonly CancellationTokenSource _collisionCts;
         private bool _disposed = false;

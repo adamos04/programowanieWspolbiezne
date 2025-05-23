@@ -62,7 +62,7 @@ namespace TP.ConcurrentProgramming.Data
                 } while (!positionValid);
 
                 Vector velocity = new Vector((random.NextDouble() - 0.5) * 5, (random.NextDouble() - 0.5) * 5);
-                Ball newBall = new Ball(startingPosition, velocity, radius);
+                Ball newBall = new Ball(startingPosition, velocity);
                 upperLayerHandler(startingPosition, newBall);
                 if (newBall is Ball ballImplementation)
                 {
