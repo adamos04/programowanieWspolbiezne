@@ -19,7 +19,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             DataBallFixture dataBallFixture = new DataBallFixture();
             List<Ball> otherBalls = new List<Ball>();
             object sharedLock = new object();
-            Ball newInstance = new(dataBallFixture, otherBalls, sharedLock);
+            Ball newInstance = new(dataBallFixture, otherBalls, sharedLock, 100.0, 50.0, 5.0);
             int numberOfCallBackCalled = 0;
             newInstance.NewPositionNotification += (sender, position) =>
             {
