@@ -93,6 +93,7 @@ namespace TP.ConcurrentProgramming.Data
                         }
                         BallsList.Clear();
                     }
+                    DiagnosticLogger.Instance.Stop();
                 }
                 Disposed = true;
             }

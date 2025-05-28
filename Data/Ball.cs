@@ -50,6 +50,7 @@ namespace TP.ConcurrentProgramming.Data
         private Thread? _moveThread;
         private volatile bool _isRunning;
         private bool _disposed = false;
+        private readonly DiagnosticLogger _logger = DiagnosticLogger.Instance;
 
         private void RaiseNewPositionChangeNotification()
         {
@@ -60,6 +61,7 @@ namespace TP.ConcurrentProgramming.Data
         {
             Vector velocity = (Vector)Velocity;
             _position = new Vector(_position.x + velocity.x, _position.y + velocity.y);
+            _logger.Log($"Ball Position: ({_position.x}, {_position.y}), Velocity: ({velocity.x}, {velocity.y})");
             RaiseNewPositionChangeNotification();
         }
 
