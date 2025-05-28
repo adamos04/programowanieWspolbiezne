@@ -21,8 +21,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             _tableHeight = tableHeight;
             _radius = radius;
             _dataBall.NewPositionNotification += RaisePositionChangeEvent;
-            _collisionCts = new CancellationTokenSource();
-            _collisionTask = Task.Run(() => DetectCollisionsAsync(_collisionCts.Token), _collisionCts.Token);
         }
 
         #region IBall
@@ -36,18 +34,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         public void Dispose()
         {
-            if (_disposed) return;
-            _disposed = true;
-
-            _collisionCts.Cancel();
-            try
-            {
-                _collisionTask.Wait();
-            }
-            catch (AggregateException)
-            {
-            }
-            _collisionCts.Dispose();
             _dataBall.Dispose();
         }
         #endregion
@@ -75,11 +61,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             other._dataBall.Velocity = new Data.Vector(v2.x + factor * dx.x * m1 / m2, v2.y + factor * dx.y * m1 / m2);
         }
 
-        internal void CheckWallCollisions()
+        internal void CheckWallCollisions(Data.IVector position)
         {
             double borderThickness = 8.0;
-            double newX = _dataBall.Position.x;
-            double newY = _dataBall.Position.y;
+            double newX = position.x;
+            double newY = position.y;
             Data.Vector velocity = (Data.Vector)_dataBall.Velocity;
             bool velocityChanged = false;
 
@@ -118,40 +104,33 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         private readonly double _tableWidth;
         private readonly double _tableHeight;
         private readonly double _radius;
-        private readonly Task _collisionTask;
-        private readonly CancellationTokenSource _collisionCts;
-        private bool _disposed = false;
 
-        private async Task DetectCollisionsAsync(CancellationToken cancellationToken)
+        private void DetectCollisions(Data.IVector myPosition)
         {
-            while (!cancellationToken.IsCancellationRequested)
+            lock (_lock)
             {
-                CheckWallCollisions();
-
-                lock (_lock)
+                foreach (var otherBall in _otherBalls)
                 {
-                    foreach (var otherBall in _otherBalls)
+                    if (otherBall == this) continue;
+
+                    Data.IVector otherPostion = otherBall._dataBall.Position;
+                    double dx = myPosition.x - otherPostion.x;
+                    double dy = myPosition.y - otherPostion.y;
+                    double distance = Math.Sqrt(dx * dx + dy * dy);
+                    if (distance <= Radius + otherBall.Radius)
                     {
-                        if (otherBall == this) continue;
-                        double dx = _dataBall.Position.x - otherBall.DataBall.Position.x;
-                        double dy = _dataBall.Position.y - otherBall.DataBall.Position.y;
-                        double distance = Math.Sqrt(dx * dx + dy * dy);
-                        if (distance <= Radius + otherBall.Radius)
-                        {
-                            CollideWith(otherBall);
-                        }
+                        CollideWith(otherBall);
                     }
                 }
-                if (cancellationToken.IsCancellationRequested)
-                    break;
-                await Task.Delay(10);
-
             }
         }
 
         private void RaisePositionChangeEvent(object? sender, Data.IVector e)
         {
-            NewPositionNotification?.Invoke(this, new Position(e.x, e.y));
+            Data.IVector newPosition = e;
+            DetectCollisions(newPosition);
+            CheckWallCollisions(newPosition);
+            NewPositionNotification?.Invoke(this, new Position(newPosition.x, newPosition.y));
         }
         #endregion
     }
