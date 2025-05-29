@@ -3,7 +3,7 @@ using System.IO;
 
 namespace TP.ConcurrentProgramming.Data
 {
-    internal class DiagnosticLogger
+    public class DiagnosticLogger
     {
         private static readonly DiagnosticLogger _instance = new DiagnosticLogger();
         public static DiagnosticLogger Instance => _instance;
