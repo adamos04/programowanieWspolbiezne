@@ -39,30 +39,44 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         #endregion
 
         #region internal
-        internal void CollideWith(Ball other)
+        internal void CollideWith(Ball other, double distance, double dx, double dy)
         {
-            Data.IVector v1 = _dataBall.Velocity;
-            Data.IVector v2 = other._dataBall.Velocity;
-            Data.IVector x1 = _dataBall.Position;
-            Data.IVector x2 = other._dataBall.Position;
+            Data.IVector myVelocity = _dataBall.Velocity;
+            Data.IVector otherVelocity = other._dataBall.Velocity;
+            Data.IVector myPosition = _dataBall.Position;
+            Data.IVector otherPosition = other._dataBall.Position;
 
-            Data.Vector dx = new Data.Vector(x1.x - x2.x, x1.y - x2.y);
-            Data.Vector dv = new Data.Vector(v1.x - v2.x, v1.y - v2.y);
+            if (distance == 0)
+                return;
 
-            double dot = dx.x * dv.x + dx.y * dv.y;
-            if (dot >= 0)
+            double nx = dx / distance;
+            double ny = dy / distance;
+
+            double dvx = myVelocity.x - otherVelocity.x;
+            double dvy = myVelocity.y - otherVelocity.y;
+
+            double impactSpeed = dvx * nx + dvy * ny;
+
+            if (impactSpeed > 0)
                 return;
 
             double m1 = Mass;
             double m2 = other.Mass;
-            double factor = 2 * m2 / (m1 + m2) * dot / (dx.x * dx.x + dx.y * dx.y);
 
-            _dataBall.Velocity = new Data.Vector(v1.x - factor * dx.x, v1.y - factor * dx.y);
-            other._dataBall.Velocity = new Data.Vector(v2.x + factor * dx.x * m1 / m2, v2.y + factor * dx.y * m1 / m2);
+            double impulse = -(2 * impactSpeed) / (m1 + m2);
+
+            double newXVel = myVelocity.x + impulse * m2 * nx;
+            double newYVel = myVelocity.y + impulse * m2 * ny;
+
+            double newOtherXVel = otherVelocity.x - impulse * m1 * nx;
+            double newOtherYVel = otherVelocity.y - impulse * m1 * ny;
+
+            _dataBall.Velocity = new Data.Vector(newXVel, newYVel);
+            other._dataBall.Velocity = new Data.Vector(newOtherXVel, newOtherYVel);
 
             Data.DiagnosticLogger.Instance.Log(
-                $"BallCollision: Ball1 (ID: {GetHashCode()}, Pos: {x1.x:F2}, {x1.y:F2}, Vel: {v1.x:F2}, {v1.y:F2}, Mass: {m1:F2}) " +
-                $"with Ball2 (ID: {other.GetHashCode()}, Pos: {x2.x:F2}, {x2.y:F2}, Vel: {v2.x:F2}, {v2.y:F2}, Mass: {m2:F2})"
+                $"BallCollision: Ball1 (ID: {GetHashCode()}, Pos: {myPosition.x:F2}, {myPosition.y:F2}, Vel: {newXVel:F2}, {newYVel:F2}, Mass: {m1:F2}) " +
+                $"with Ball2 (ID: {other.GetHashCode()}, Pos: {otherPosition.x:F2}, {otherPosition.y:F2}, Vel: {newOtherXVel:F2}, {newOtherYVel:F2}, Mass: {m2:F2})"
             );
         }
 
@@ -130,13 +144,13 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 {
                     if (otherBall == this) continue;
 
-                    Data.IVector otherPostion = otherBall._dataBall.Position;
-                    double dx = myPosition.x - otherPostion.x;
-                    double dy = myPosition.y - otherPostion.y;
+                    Data.IVector otherPosition = otherBall._dataBall.Position;
+                    double dx = myPosition.x - otherPosition.x;
+                    double dy = myPosition.y - otherPosition.y;
                     double distance = Math.Sqrt(dx * dx + dy * dy);
                     if (distance <= Radius + otherBall.Radius)
                     {
-                        CollideWith(otherBall);
+                        CollideWith(otherBall, distance, dx, dy);
                     }
                 }
             }
