@@ -8,11 +8,13 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+using TP.ConcurrentProgramming.Data;
+
 namespace TP.ConcurrentProgramming.BusinessLogic
 {
     internal class Ball : IBall
     {
-        public Ball(Data.IBall ball, List<Ball> otherBalls, object sharedLock, double tableWidth, double tableHeight, double radius)
+        public Ball(Data.IBall ball, List<Ball> otherBalls, object sharedLock, double tableWidth, double tableHeight, double radius, ILogger logger)
         {
             _dataBall = ball;
             _otherBalls = otherBalls;
@@ -20,6 +22,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             _tableWidth = tableWidth;
             _tableHeight = tableHeight;
             _radius = radius;
+            _logger = logger;
             _dataBall.NewPositionNotification += RaisePositionChangeEvent;
         }
 
@@ -74,7 +77,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             _dataBall.Velocity = new Data.Vector(newXVel, newYVel);
             other._dataBall.Velocity = new Data.Vector(newOtherXVel, newOtherYVel);
 
-            Data.DiagnosticLogger.Instance.Log(
+            _logger.Log(
                 $"BallCollision: Ball1 (ID: {GetHashCode()}, Pos: {myPosition.x:F2}, {myPosition.y:F2}, Vel: {newXVel:F2}, {newYVel:F2}, Mass: {m1:F2}) " +
                 $"with Ball2 (ID: {other.GetHashCode()}, Pos: {otherPosition.x:F2}, {otherPosition.y:F2}, Vel: {newOtherXVel:F2}, {newOtherYVel:F2}, Mass: {m2:F2})"
             );
@@ -92,7 +95,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             {
                 velocity = new Data.Vector(-velocity.x, velocity.y);
                 velocityChanged = true;
-                TP.ConcurrentProgramming.Data.DiagnosticLogger.Instance.Log(
+                _logger.Log(
                     $"WallCollision: Ball (ID: {GetHashCode()}, Pos: {newX:F2}, {newY:F2}, Vel: {velocity.x:F2}, {velocity.y:F2}, Mass: {Mass:F2}, Wall: Left)"
                 );
             }
@@ -100,7 +103,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             {
                 velocity = new Data.Vector(-velocity.x, velocity.y);
                 velocityChanged = true;
-                TP.ConcurrentProgramming.Data.DiagnosticLogger.Instance.Log(
+                _logger.Log(
                     $"WallCollision: Ball (ID: {GetHashCode()}, Pos: {newX:F2}, {newY:F2}, Vel: {velocity.x:F2}, {velocity.y:F2}, Mass: {Mass:F2}, Wall: Right)"
                 );
             }
@@ -108,7 +111,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             {
                 velocity = new Data.Vector(velocity.x, -velocity.y);
                 velocityChanged = true;
-                TP.ConcurrentProgramming.Data.DiagnosticLogger.Instance.Log(
+                _logger.Log(
                     $"WallCollision: Ball (ID: {GetHashCode()}, Pos: {newX:F2}, {newY:F2}, Vel: {velocity.x:F2}, {velocity.y:F2}, Mass: {Mass:F2}, Wall: Top)"
                 );
             }
@@ -116,7 +119,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             {
                 velocity = new Data.Vector(velocity.x, -velocity.y);
                 velocityChanged = true;
-                TP.ConcurrentProgramming.Data.DiagnosticLogger.Instance.Log(
+                _logger.Log(
                     $"WallCollision: Ball (ID: {GetHashCode()}, Pos: {newX:F2}, {newY:F2}, Vel: {velocity.x:F2}, {velocity.y:F2}, Mass: {Mass:F2}, Wall: Bottom)"
                 );
             }
@@ -135,6 +138,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         private readonly double _tableWidth;
         private readonly double _tableHeight;
         private readonly double _radius;
+        private readonly ILogger _logger;
 
         private void DetectCollisions(Data.IVector myPosition)
         {

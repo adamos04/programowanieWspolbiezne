@@ -10,6 +10,7 @@
 
 using System.Diagnostics;
 using UnderneathLayerAPI = TP.ConcurrentProgramming.Data.DataAbstractAPI;
+using TP.ConcurrentProgramming.Data;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
 {
@@ -23,6 +24,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
         {
             layerBellow = underneathLayer ?? UnderneathLayerAPI.GetDataLayer();
+            _logger = UnderneathLayerAPI.GetLogger();
         }
         #endregion
 
@@ -42,6 +44,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 ball.Dispose();
             }
             layerBellow.Dispose();
+            _logger.Stop();
             Disposed = true;
         }
 
@@ -58,7 +61,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             {
                 lock (_lock)
                 {
-                    Ball logicBall = new Ball(databall, BallsList, _lock, tableWidth, tableHeight, radius);
+                    Ball logicBall = new Ball(databall, BallsList, _lock, tableWidth, tableHeight, radius, _logger);
                     upperLayerHandler(new Position(startingPosition.x, startingPosition.y), logicBall);
                     BallsList.Add(logicBall);
                 }
@@ -69,9 +72,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         #region private
         private bool Disposed = false;
         private readonly UnderneathLayerAPI layerBellow;
+        private readonly ILogger _logger;
         private readonly List<Ball> BallsList = [];
         private readonly object _lock = new();
-
         #endregion
 
         #region TestingInfrastructure
