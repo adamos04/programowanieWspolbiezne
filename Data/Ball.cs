@@ -28,10 +28,14 @@ namespace TP.ConcurrentProgramming.Data
         public IVector Velocity
         {
             get => _velocity;
-            set => _velocity = (Vector)value;
+        }
+        public double Mass { get; }
+
+        public void UpdateVelocity(double x, double y)
+        {
+            _velocity = new Vector(x,y);
         }
 
-        public double Mass { get; }
         public IVector Position => _position;
 
         public void Dispose()

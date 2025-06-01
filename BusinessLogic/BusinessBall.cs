@@ -74,8 +74,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             double newOtherXVel = otherVelocity.x - impulse * m1 * nx;
             double newOtherYVel = otherVelocity.y - impulse * m1 * ny;
 
-            _dataBall.Velocity = new Data.Vector(newXVel, newYVel);
-            other._dataBall.Velocity = new Data.Vector(newOtherXVel, newOtherYVel);
+            _dataBall.UpdateVelocity(newXVel, newYVel);
+            other._dataBall.UpdateVelocity(newOtherXVel, newOtherYVel);
 
             _logger.Log(
                 $"BallCollision: Ball1 (ID: {GetHashCode()}, Pos: {myPosition.x:F2}, {myPosition.y:F2}, Vel: {newXVel:F2}, {newYVel:F2}, Mass: {m1:F2}) " +
@@ -88,51 +88,51 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             double borderThickness = 8.0;
             double newX = position.x;
             double newY = position.y;
-            Data.Vector velocity = (Data.Vector)_dataBall.Velocity;
-            bool velocityChanged = false;
+            Data.IVector velocity = _dataBall.Velocity;
+            double newVelocityX;
+            double newVelocityY;
 
             if (newX - Radius <= 0 && velocity.x < 0)
             {
-                velocity = new Data.Vector(-velocity.x, velocity.y);
-                velocityChanged = true;
+                newVelocityX = -velocity.x;
+                newVelocityY = velocity.y;
+                _dataBall.UpdateVelocity(newVelocityX, newVelocityY);
                 _logger.Log(
-                    $"WallCollision: Ball (ID: {GetHashCode()}, Pos: {newX:F2}, {newY:F2}, Vel: {velocity.x:F2}, {velocity.y:F2}, Mass: {Mass:F2}, Wall: Left)"
+                    $"WallCollision: Ball (ID: {GetHashCode()}, Pos: {newX:F2}, {newY:F2}, Vel: {newVelocityX:F2}, {newVelocityY:F2}, Mass: {Mass:F2}, Wall: Left)"
                 );
             }
             else if (newX + Radius >= _tableWidth - borderThickness && velocity.x > 0)
             {
-                velocity = new Data.Vector(-velocity.x, velocity.y);
-                velocityChanged = true;
+                newVelocityX = -velocity.x;
+                newVelocityY = velocity.y;
+                _dataBall.UpdateVelocity(newVelocityX, newVelocityY);
                 _logger.Log(
-                    $"WallCollision: Ball (ID: {GetHashCode()}, Pos: {newX:F2}, {newY:F2}, Vel: {velocity.x:F2}, {velocity.y:F2}, Mass: {Mass:F2}, Wall: Right)"
+                    $"WallCollision: Ball (ID: {GetHashCode()}, Pos: {newX:F2}, {newY:F2}, Vel: {newVelocityX:F2}, {newVelocityY:F2}, Mass: {Mass:F2}, Wall: Right)"
                 );
             }
             if (newY - Radius <= 0 && velocity.y < 0)
             {
-                velocity = new Data.Vector(velocity.x, -velocity.y);
-                velocityChanged = true;
+                newVelocityX = velocity.x;
+                newVelocityY = -velocity.y;
+                _dataBall.UpdateVelocity(newVelocityX, newVelocityY);
                 _logger.Log(
-                    $"WallCollision: Ball (ID: {GetHashCode()}, Pos: {newX:F2}, {newY:F2}, Vel: {velocity.x:F2}, {velocity.y:F2}, Mass: {Mass:F2}, Wall: Top)"
+                    $"WallCollision: Ball (ID: {GetHashCode()}, Pos: {newX:F2}, {newY:F2}, Vel: {newVelocityX:F2}, {newVelocityY:F2}, Mass: {Mass:F2}, Wall: Top)"
                 );
             }
             else if (newY + Radius >= _tableHeight - borderThickness && velocity.y > 0)
             {
-                velocity = new Data.Vector(velocity.x, -velocity.y);
-                velocityChanged = true;
+                newVelocityX = velocity.x;
+                newVelocityY = -velocity.y;
+                _dataBall.UpdateVelocity(newVelocityX, newVelocityY);
                 _logger.Log(
-                    $"WallCollision: Ball (ID: {GetHashCode()}, Pos: {newX:F2}, {newY:F2}, Vel: {velocity.x:F2}, {velocity.y:F2}, Mass: {Mass:F2}, Wall: Bottom)"
+                    $"WallCollision: Ball (ID: {GetHashCode()}, Pos: {newX:F2}, {newY:F2}, Vel: {newVelocityX:F2}, {newVelocityY:F2}, Mass: {Mass:F2}, Wall: Bottom)"
                 );
-            }
-
-            if (velocityChanged)
-            {
-                _dataBall.Velocity = velocity;
             }
         }
         #endregion
 
         #region private
-        private readonly Data.IBall _dataBall;
+        private Data.IBall _dataBall;
         private readonly List<Ball> _otherBalls;
         private readonly object _lock;
         private readonly double _tableWidth;
