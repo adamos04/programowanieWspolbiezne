@@ -43,9 +43,8 @@ namespace TP.ConcurrentProgramming.Data
         IVector Position { get; }
         void UpdateVelocity(double x, double y);
     }
-    public interface ILogger
+    public interface ILogger : IDisposable
     {
         void Log(string message);
-        void Stop();
     }
 }

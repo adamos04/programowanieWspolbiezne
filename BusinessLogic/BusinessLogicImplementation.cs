@@ -44,7 +44,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 ball.Dispose();
             }
             layerBellow.Dispose();
-            _logger.Stop();
+            _logger.Dispose();
             Disposed = true;
         }
 
