@@ -67,7 +67,7 @@ namespace TP.ConcurrentProgramming.Data
         {
             Vector velocity = (Vector)Velocity;
             _position = new Vector(_position.x + velocity.x * deltaTime, _position.y + velocity.y * deltaTime);
-            _logger.Log($"ID: {GetHashCode()}, Ball Position: ({_position.x:F2}, {_position.y:F2}), Velocity: ({velocity.x:F2}, {velocity.y:F2}), Mass: {Mass:F2}, DeltaTime: {deltaTime:F3}s");
+            _logger.Log($"ID: {GetHashCode()}, Ball Position: ({_position.x:F2}; {_position.y:F2}), Velocity: ({velocity.x:F2}; {velocity.y:F2}), Mass: {Mass:F2}, DeltaTime: {deltaTime:F3}s");
             RaiseNewPositionChangeNotification();
         }
 
