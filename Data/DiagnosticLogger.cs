@@ -23,7 +23,7 @@ namespace TP.ConcurrentProgramming.Data
             string logsDirectory = Path.Combine(projectDirectory, "Logs");
             Directory.CreateDirectory(logsDirectory);
             string dateTime = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
-            _logFilePath = Path.Combine(logsDirectory, $"diagnostics_{dateTime}.log");
+            _logFilePath = Path.Combine(logsDirectory, $"diagnostics_{dateTime}.json");
 
             if (File.Exists(_logFilePath))
             {
