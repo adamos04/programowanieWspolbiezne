@@ -8,6 +8,8 @@
 //
 //_____________________________________________________________________________________________________________________________________
 
+using System.Diagnostics;
+
 namespace TP.ConcurrentProgramming.Data
 {
     internal class Ball : IBall
@@ -61,11 +63,11 @@ namespace TP.ConcurrentProgramming.Data
             NewPositionNotification?.Invoke(this, _position);
         }
 
-        private void Move()
+        private void Move(double deltaTime)
         {
             Vector velocity = (Vector)Velocity;
-            _position = new Vector(_position.x + velocity.x, _position.y + velocity.y);
-            _logger.Log($"ID: {GetHashCode()}, Ball Position: ({_position.x:F2}, {_position.y:F2}), Velocity: ({velocity.x:F2}, {velocity.y:F2}), Mass: {Mass:F2}");
+            _position = new Vector(_position.x + velocity.x * deltaTime, _position.y + velocity.y * deltaTime);
+            _logger.Log($"ID: {GetHashCode()}, Ball Position: ({_position.x:F2}, {_position.y:F2}), Velocity: ({velocity.x:F2}, {velocity.y:F2}), Mass: {Mass:F2}, DeltaTime: {deltaTime:F3}s");
             RaiseNewPositionChangeNotification();
         }
 
@@ -78,11 +80,22 @@ namespace TP.ConcurrentProgramming.Data
 
         private void MoveContinuously()
         {
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            double lastUpdateTime = 0.0;
+
             while (_isRunning)
             {
-                Move();
+                double currentTime = stopwatch.Elapsed.TotalSeconds;
+                double deltaTime = currentTime - lastUpdateTime;
+
+                if (deltaTime > 0.0)
+                {
+                    Move(deltaTime);
+                    lastUpdateTime = currentTime;
+                }
+
                 double speed = Math.Sqrt(_velocity.x * _velocity.x + _velocity.y * _velocity.y);
-                int delay = (int)Math.Clamp(1000 / (speed * 40), 10, 30);
+                int delay = (int)Math.Clamp(1000.0 / (speed * 40.0 + 0.1), 10, 30);
                 Thread.Sleep(delay);
             }
         }
