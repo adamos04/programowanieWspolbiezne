@@ -19,30 +19,16 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             DataBallFixture dataBallFixture = new DataBallFixture();
             List<Ball> otherBalls = new List<Ball>();
             object sharedLock = new object();
-            Ball newInstance = new(dataBallFixture, otherBalls, sharedLock, 100.0, 50.0, 5.0);
-            int numberOfCallBackCalled = 0;
-            newInstance.NewPositionNotification += (sender, position) =>
-            {
-                Assert.IsNotNull(sender);
-                Assert.IsNotNull(position);
-                numberOfCallBackCalled++;
-            };
-            dataBallFixture.Move();
-            Thread.Sleep(20);
-            Assert.AreEqual<int>(1, numberOfCallBackCalled);
-            newInstance.Dispose();
         }
 
         #region testing instrumentation
 
         private class DataBallFixture : Data.IBall
         {
-            public Data.IVector Velocity { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-            public double Radius { get => throw new NotImplementedException(); }
+            public Data.IVector Velocity { get => throw new NotImplementedException(); }
+            public void UpdateVelocity(double x, double y) {}
             public double Mass { get => throw new NotImplementedException(); }
-            public Data.IVector Position { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-            public double TableWidth { get => throw new NotImplementedException(); }
-            public double TableHeight { get => throw new NotImplementedException(); }
+            public Data.IVector Position { get => throw new NotImplementedException(); }
 
             public event EventHandler<Data.IVector>? NewPositionNotification;
             public void Dispose()

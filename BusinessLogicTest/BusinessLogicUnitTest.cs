@@ -102,7 +102,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             {
                 StartCalled = true;
                 NumberOfBallseCreated = numberOfBalls;
-                upperLayerHandler(new DataVectorFixture(), new DataBallFixture { Velocity = new DataVectorFixture(), TableWidth = tableWidth, TableHeight = tableHeight });
+                upperLayerHandler(new DataVectorFixture(), new DataBallFixture { Velocity = new DataVectorFixture(),});
             }
 
             private record DataVectorFixture : Data.IVector
@@ -114,11 +114,14 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             private class DataBallFixture : Data.IBall
             {
                 public required IVector Velocity { get; set; } = new DataVectorFixture();
-                public double Radius { get; } = 1.0;
                 public double Mass { get; } = 1.0;
-                public IVector Position { get; set; } = new DataVectorFixture();
-                public double TableWidth { get; set; }
-                public double TableHeight { get; set; }
+                public IVector Position { get;} = new DataVectorFixture();
+
+                public void UpdateVelocity(double x, double y)
+                {
+                    Velocity = new DataVectorFixture { x = x, y = y };
+                }
+
 
                 public event EventHandler<IVector>? NewPositionNotification;
 
