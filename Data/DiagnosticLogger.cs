@@ -22,7 +22,8 @@ namespace TP.ConcurrentProgramming.Data
             string projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\.."));
             string logsDirectory = Path.Combine(projectDirectory, "Logs");
             Directory.CreateDirectory(logsDirectory);
-            _logFilePath = Path.Combine(logsDirectory, "diagnostics.log");
+            string dateTime = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
+            _logFilePath = Path.Combine(logsDirectory, $"diagnostics_{dateTime}.log");
 
             if (File.Exists(_logFilePath))
             {
@@ -97,12 +98,6 @@ namespace TP.ConcurrentProgramming.Data
                 }
                 _disposed = true;
             }
-        }
-
-        public void Stop()
-        {
-            _isRunning = false;
-            _logThread.Join();
         }
     }
 
