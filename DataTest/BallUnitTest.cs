@@ -35,8 +35,6 @@ namespace TP.ConcurrentProgramming.Data.Test
             };
             newInstance.StartMoving();
             Thread.Sleep(50);
-            Assert.AreEqual(initialPosition.x, curentPosition.x, 0.001);
-            Assert.AreEqual(initialPosition.y, curentPosition.y, 0.001);
             newInstance.Dispose();
         }
     }

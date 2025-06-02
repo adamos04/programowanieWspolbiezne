@@ -104,7 +104,7 @@ namespace TP.ConcurrentProgramming.Data
     internal class LogEntry
     {
         public DateTime Timestamp { get; set; }
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
     }
 
 
@@ -132,7 +132,7 @@ namespace TP.ConcurrentProgramming.Data
             {
                 if (_count == _capacity)
                 {
-                    return false; // Bufor pełny
+                    return false;
                 }
 
                 _buffer[_tail] = item;
@@ -149,11 +149,11 @@ namespace TP.ConcurrentProgramming.Data
                 if (_count == 0)
                 {
                     item = null;
-                    return false; // Bufor pusty
+                    return false;
                 }
 
                 item = _buffer[_head];
-                _buffer[_head] = null; // Czyszczenie slotu
+                _buffer[_head] = null;
                 _head = (_head + 1) % _capacity;
                 _count--;
                 return true;
