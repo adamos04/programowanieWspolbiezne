@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.IO;
+using System.Text.Json;
+
 
 namespace TP.ConcurrentProgramming.Data
 {
@@ -17,7 +19,7 @@ namespace TP.ConcurrentProgramming.Data
 
         private DiagnosticLogger()
         {
-            string projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\.."));
+            string projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\.."));
             string logsDirectory = Path.Combine(projectDirectory, "Logs");
             Directory.CreateDirectory(logsDirectory);
             _logFilePath = Path.Combine(logsDirectory, "diagnostics.log");
@@ -41,7 +43,13 @@ namespace TP.ConcurrentProgramming.Data
 
         public void Log(string message)
         {
-            if (!_logBuffer.TryAdd($"{DateTime.Now:O}: {message}"))
+            var logEntry = new LogEntry
+            {
+                Timestamp = DateTime.Now,
+                Message = message
+            };
+            string jsonMessage = JsonSerializer.Serialize(logEntry);
+            if (!_logBuffer.TryAdd(jsonMessage))
             {
                 System.Diagnostics.Debug.WriteLine("Bufor logów pełny, odrzucono wiadomość.");
             }
@@ -96,6 +104,12 @@ namespace TP.ConcurrentProgramming.Data
             _isRunning = false;
             _logThread.Join();
         }
+    }
+
+    internal class LogEntry
+    {
+        public DateTime Timestamp { get; set; }
+        public string Message { get; set; }
     }
 
 
