@@ -45,6 +45,6 @@ namespace TP.ConcurrentProgramming.Data
     }
     public interface ILogger : IDisposable
     {
-        void Log(string message);
+        void Log(LogMessage message);
     }
 }

@@ -77,10 +77,21 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             _dataBall.UpdateVelocity(newXVel, newYVel);
             other._dataBall.UpdateVelocity(newOtherXVel, newOtherYVel);
 
-            _logger.Log(
-                $"BallCollision: Ball1 (ID: {GetHashCode()}, Pos: ({myPosition.x:F2}; {myPosition.y:F2}), Vel: ({newXVel:F2}; {newYVel:F2}), Mass: {m1:F2}) " +
-                $"with Ball2 (ID: {other.GetHashCode()}, Pos: ({otherPosition.x:F2}; {otherPosition.y:F2}), Vel: ({newOtherXVel:F2}; {newOtherYVel:F2}), Mass: {m2:F2})"
-            );
+            _logger.Log(new BallCollisionLog
+            {
+                Ball1Id = GetHashCode(),
+                Ball1PosX = myPosition.x,
+                Ball1PosY = myPosition.y,
+                Ball1VelX = newXVel,
+                Ball1VelY = newYVel,
+                Ball1Mass = m1,
+                Ball2Id = other.GetHashCode(),
+                Ball2PosX = otherPosition.x,
+                Ball2PosY = otherPosition.y,
+                Ball2VelX = newOtherXVel,
+                Ball2VelY = newOtherYVel,
+                Ball2Mass = m2
+            });
         }
 
         internal void CheckWallCollisions(Data.IVector position)
@@ -97,36 +108,64 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 newVelocityX = -velocity.x;
                 newVelocityY = velocity.y;
                 _dataBall.UpdateVelocity(newVelocityX, newVelocityY);
-                _logger.Log(
-                    $"WallCollision: Ball (ID: {GetHashCode()}, Pos: ({newX:F2}; {newY:F2}), Vel: ({newVelocityX:F2}; {newVelocityY:F2}), Mass: {Mass:F2}, Wall: Left)"
-                );
+                _logger.Log(new WallCollisionLog
+                {
+                    BallId = GetHashCode(),
+                    PosX = newX,
+                    PosY = newY,
+                    VelX = newVelocityX,
+                    VelY = newVelocityY,
+                    Mass = Mass,
+                    Wall = "Left"
+                });
             }
             else if (newX + Radius >= _tableWidth - borderThickness && velocity.x > 0)
             {
                 newVelocityX = -velocity.x;
                 newVelocityY = velocity.y;
                 _dataBall.UpdateVelocity(newVelocityX, newVelocityY);
-                _logger.Log(
-                    $"WallCollision: Ball (ID: {GetHashCode()}, Pos: ({newX:F2}; {newY:F2}), Vel: ({newVelocityX:F2}; {newVelocityY:F2}), Mass: {Mass:F2}, Wall: Right)"
-                );
+                _logger.Log(new WallCollisionLog
+                {
+                    BallId = GetHashCode(),
+                    PosX = newX,
+                    PosY = newY,
+                    VelX = newVelocityX,
+                    VelY = newVelocityY,
+                    Mass = Mass,
+                    Wall = "Right"
+                });
             }
             if (newY - Radius <= 0 && velocity.y < 0)
             {
                 newVelocityX = velocity.x;
                 newVelocityY = -velocity.y;
                 _dataBall.UpdateVelocity(newVelocityX, newVelocityY);
-                _logger.Log(
-                    $"WallCollision: Ball (ID: {GetHashCode()}, Pos: ({newX:F2}; {newY:F2}), Vel: ({newVelocityX:F2}; {newVelocityY:F2}), Mass: {Mass:F2}, Wall: Top)"
-                );
+                _logger.Log(new WallCollisionLog
+                {
+                    BallId = GetHashCode(),
+                    PosX = newX,
+                    PosY = newY,
+                    VelX = newVelocityX,
+                    VelY = newVelocityY,
+                    Mass = Mass,
+                    Wall = "Top"
+                });
             }
             else if (newY + Radius >= _tableHeight - borderThickness && velocity.y > 0)
             {
                 newVelocityX = velocity.x;
                 newVelocityY = -velocity.y;
                 _dataBall.UpdateVelocity(newVelocityX, newVelocityY);
-                _logger.Log(
-                    $"WallCollision: Ball (ID: {GetHashCode()}, Pos: ({newX:F2}; {newY:F2}), Vel: ({newVelocityX:F2}; {newVelocityY:F2}), Mass: {Mass:F2}, Wall: Bottom)"
-                );
+                _logger.Log(new WallCollisionLog
+                {
+                    BallId = GetHashCode(),
+                    PosX = newX,
+                    PosY = newY,
+                    VelX = newVelocityX,
+                    VelY = newVelocityY,
+                    Mass = Mass,
+                    Wall = "Bottom"
+                });
             }
         }
         #endregion

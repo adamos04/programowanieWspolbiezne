@@ -9,6 +9,7 @@
 //_____________________________________________________________________________________________________________________________________
 
 using System.Diagnostics;
+using TP.ConcurrentProgramming.Data;
 
 namespace TP.ConcurrentProgramming.Data
 {
@@ -35,7 +36,7 @@ namespace TP.ConcurrentProgramming.Data
 
         public void UpdateVelocity(double x, double y)
         {
-            _velocity = new Vector(x,y);
+            _velocity = new Vector(x, y);
         }
 
         public IVector Position => _position;
@@ -67,7 +68,16 @@ namespace TP.ConcurrentProgramming.Data
         {
             Vector velocity = (Vector)Velocity;
             _position = new Vector(_position.x + velocity.x * deltaTime, _position.y + velocity.y * deltaTime);
-            _logger.Log($"ID: {GetHashCode()}, Ball Position: ({_position.x:F2}; {_position.y:F2}), Velocity: ({velocity.x:F2}; {velocity.y:F2}), Mass: {Mass:F2}, DeltaTime: {deltaTime:F3}s");
+            _logger.Log(new BallPositionLog
+            {
+                BallId = GetHashCode(),
+                PosX = _position.x,
+                PosY = _position.y,
+                VelX = velocity.x,
+                VelY = velocity.y,
+                Mass = Mass,
+                DeltaTime = deltaTime
+            });
             RaiseNewPositionChangeNotification();
         }
 

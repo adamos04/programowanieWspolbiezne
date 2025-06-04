@@ -1,7 +1,6 @@
-﻿using System.Collections.Concurrent;
-using System.IO;
+﻿using System;
+using System.Text;
 using System.Text.Json;
-
 
 namespace TP.ConcurrentProgramming.Data
 {
@@ -13,6 +12,7 @@ namespace TP.ConcurrentProgramming.Data
         private readonly Thread _logThread;
         private volatile bool _isRunning = true;
         private readonly string _logFilePath;
+        private readonly StreamWriter logWriter;
         private readonly object _fileLock = new object();
         private readonly DiagnosticBuffer _logBuffer;
         private bool _disposed = false;
@@ -37,22 +37,21 @@ namespace TP.ConcurrentProgramming.Data
                 }
             }
 
+            logWriter = new StreamWriter(_logFilePath, append: true, Encoding.UTF8) { AutoFlush = true };
             _logBuffer = new DiagnosticBuffer(1000);
-            _logThread = new Thread(LogToFile) { IsBackground = true };
+            _logThread = new Thread(LogToFile);
             _logThread.Start();
         }
 
-        public void Log(string message)
+        public void Log(LogMessage message)
         {
-            var logEntry = new LogEntry
+            if (_isRunning && !_disposed)
             {
-                Timestamp = DateTime.Now,
-                Message = message
-            };
-            string jsonMessage = JsonSerializer.Serialize(logEntry);
-            if (!_logBuffer.TryAdd(jsonMessage))
-            {
-                System.Diagnostics.Debug.WriteLine("Bufor logów pełny, odrzucono wiadomość.");
+                message.Timestamp = DateTime.Now;
+                if (!_logBuffer.TryAdd(message))
+                {
+                    System.Diagnostics.Debug.WriteLine("Bufor logów pełny, odrzucono wiadomość.");
+                }
             }
         }
 
@@ -66,7 +65,14 @@ namespace TP.ConcurrentProgramming.Data
                     {
                         try
                         {
-                            File.AppendAllText(_logFilePath, message + Environment.NewLine);
+                            string jsonMessage = message switch
+                            {
+                                BallPositionLog ballPosition => JsonSerializer.Serialize(ballPosition),
+                                BallCollisionLog ballCollision => JsonSerializer.Serialize(ballCollision),
+                                WallCollisionLog wallCollision => JsonSerializer.Serialize(wallCollision),
+                                _ => throw new InvalidOperationException($"Unknown LogMessage type: {message?.GetType().Name}")
+                            };
+                            logWriter.WriteLine(jsonMessage);
                         }
                         catch (IOException ex)
                         {
@@ -95,22 +101,23 @@ namespace TP.ConcurrentProgramming.Data
                 {
                     _isRunning = false;
                     _logThread.Join();
+                    try
+                    {
+                        logWriter?.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Błąd podczas zamykania pliku logu: {ex.Message}");
+                    }
                 }
                 _disposed = true;
             }
         }
     }
 
-    internal class LogEntry
-    {
-        public DateTime Timestamp { get; set; }
-        public string Message { get; set; } = string.Empty;
-    }
-
-
     internal class DiagnosticBuffer
     {
-        private readonly string?[] _buffer;
+        private readonly LogMessage?[] _buffer;
         private int _head;
         private int _tail;
         private int _count;
@@ -120,13 +127,13 @@ namespace TP.ConcurrentProgramming.Data
         public DiagnosticBuffer(int capacity)
         {
             _capacity = capacity;
-            _buffer = new string?[capacity];
+            _buffer = new LogMessage?[capacity];
             _head = 0;
             _tail = 0;
             _count = 0;
         }
 
-        public bool TryAdd(string item)
+        public bool TryAdd(LogMessage item)
         {
             lock (_bufferLock)
             {
@@ -142,7 +149,7 @@ namespace TP.ConcurrentProgramming.Data
             }
         }
 
-        public bool TryTake(out string? item)
+        public bool TryTake(out LogMessage? item)
         {
             lock (_bufferLock)
             {
@@ -159,5 +166,52 @@ namespace TP.ConcurrentProgramming.Data
                 return true;
             }
         }
+    }
+
+    public abstract class LogMessage
+    {
+        public DateTime Timestamp { get; set; }
+        public abstract string MessageType { get; }
+    }
+
+    public class BallPositionLog : LogMessage
+    {
+        public int BallId { get; set; }
+        public double PosX { get; set; }
+        public double PosY { get; set; }
+        public double VelX { get; set; }
+        public double VelY { get; set; }
+        public double Mass { get; set; }
+        public double DeltaTime { get; set; }
+        public override string MessageType => "BallPosition";
+    }
+
+    public class BallCollisionLog : LogMessage
+    {
+        public int Ball1Id { get; set; }
+        public double Ball1PosX { get; set; }
+        public double Ball1PosY { get; set; }
+        public double Ball1VelX { get; set; }
+        public double Ball1VelY { get; set; }
+        public double Ball1Mass { get; set; }
+        public int Ball2Id { get; set; }
+        public double Ball2PosX { get; set; }
+        public double Ball2PosY { get; set; }
+        public double Ball2VelX { get; set; }
+        public double Ball2VelY { get; set; }
+        public double Ball2Mass { get; set; }
+        public override string MessageType => "BallCollision";
+    }
+
+    public class WallCollisionLog : LogMessage
+    {
+        public int BallId { get; set; }
+        public double PosX { get; set; }
+        public double PosY { get; set; }
+        public double VelX { get; set; }
+        public double VelY { get; set; }
+        public double Mass { get; set; }
+        public string Wall { get; set; } = string.Empty;
+        public override string MessageType => "WallCollision";
     }
 }
