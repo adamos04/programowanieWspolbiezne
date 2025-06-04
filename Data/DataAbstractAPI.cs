@@ -45,6 +45,7 @@ namespace TP.ConcurrentProgramming.Data
     }
     public interface ILogger : IDisposable
     {
-        void Log(LogMessage message);
+        void Log(int messageType, int ball1Id, double ball1PosX, double ball1PosY, double ball1VelX, double ball1VelY, double ball1Mass, double? deltatime,
+                         int? ball2Id, double? ball2PosX, double? ball2PosY, double? ball2VelX, double? ball2VelY, double? ball2Mass);
     }
 }

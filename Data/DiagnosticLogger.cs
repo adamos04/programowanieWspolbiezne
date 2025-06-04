@@ -44,12 +44,41 @@ namespace TP.ConcurrentProgramming.Data
             _logThread.Start();
         }
 
-        public void Log(LogMessage message)
+        public void Log(int messageType, int ball1Id, double ball1PosX, double ball1PosY, double ball1VelX, double ball1VelY, double ball1Mass, double? deltaTime, int? ball2Id, double? ball2PosX, double? ball2PosY, double? ball2VelX, double? ball2VelY, double? ball2Mass)
         {
             if (_isRunning && !_disposed)
             {
-                message.Timestamp = DateTime.Now;
-                if (!_logBuffer.TryAdd(message))
+                if (!Enum.IsDefined(typeof(LogMessageType), messageType))
+                {
+                    System.Diagnostics.Debug.WriteLine($"Nieprawidłowy messageType: {messageType}");
+                    return;
+                }
+
+                var logMessage = new LogMessage
+                {
+                    Timestamp = DateTime.Now,
+                    MessageType = (LogMessageType)messageType,
+                    Ball1 = new BallData
+                    {
+                        BallId = ball1Id,
+                        PosX = ball1PosX,
+                        PosY = ball1PosY,
+                        VelX = ball1VelX,
+                        VelY = ball1VelY,
+                        Mass = ball1Mass,
+                        DeltaTime = deltaTime
+                    },
+                    Ball2 = ball2Id.HasValue ? new BallData
+                    {
+                        BallId = ball2Id.Value,
+                        PosX = ball2PosX ?? 0,
+                        PosY = ball2PosY ?? 0,
+                        VelX = ball2VelX ?? 0,
+                        VelY = ball2VelY ?? 0,
+                        Mass = ball2Mass ?? 0
+                    } : null
+                };
+                if (!_logBuffer.TryAdd(logMessage))
                 {
                     System.Diagnostics.Debug.WriteLine("Bufor logów pełny, odrzucono wiadomość.");
                 }
