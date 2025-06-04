@@ -77,20 +77,27 @@ namespace TP.ConcurrentProgramming.BusinessLogic
             _dataBall.UpdateVelocity(newXVel, newYVel);
             other._dataBall.UpdateVelocity(newOtherXVel, newOtherYVel);
 
-            _logger.Log(new BallCollisionLog
+            _logger.Log(new LogMessage
             {
-                Ball1Id = GetHashCode(),
-                Ball1PosX = myPosition.x,
-                Ball1PosY = myPosition.y,
-                Ball1VelX = newXVel,
-                Ball1VelY = newYVel,
-                Ball1Mass = m1,
-                Ball2Id = other.GetHashCode(),
-                Ball2PosX = otherPosition.x,
-                Ball2PosY = otherPosition.y,
-                Ball2VelX = newOtherXVel,
-                Ball2VelY = newOtherYVel,
-                Ball2Mass = m2
+                MessageType = LogMessageType.BallToBallCollision,
+                Ball1 = new BallData
+                {
+                    BallId = _dataBall.GetHashCode(),
+                    PosX = myPosition.x,
+                    PosY = myPosition.y,
+                    VelX = newXVel,
+                    VelY = newYVel,
+                    Mass = m1
+                },
+                Ball2 = new BallData
+                {
+                    BallId = other.GetHashCode(),
+                    PosX = otherPosition.x,
+                    PosY = otherPosition.y,
+                    VelX = newOtherXVel,
+                    VelY = newOtherYVel,
+                    Mass = m2
+                }
             });
         }
 
@@ -108,15 +115,18 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 newVelocityX = -velocity.x;
                 newVelocityY = velocity.y;
                 _dataBall.UpdateVelocity(newVelocityX, newVelocityY);
-                _logger.Log(new WallCollisionLog
+                _logger.Log(new LogMessage
                 {
-                    BallId = GetHashCode(),
-                    PosX = newX,
-                    PosY = newY,
-                    VelX = newVelocityX,
-                    VelY = newVelocityY,
-                    Mass = Mass,
-                    Wall = "Left"
+                    MessageType = LogMessageType.WallCollisionLeft,
+                    Ball1 = new BallData
+                    {
+                        BallId = _dataBall.GetHashCode(),
+                        PosX = newX,
+                        PosY = newY,
+                        VelX = newVelocityX,
+                        VelY = newVelocityY,
+                        Mass = Mass
+                    }
                 });
             }
             else if (newX + Radius >= _tableWidth - borderThickness && velocity.x > 0)
@@ -124,15 +134,18 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 newVelocityX = -velocity.x;
                 newVelocityY = velocity.y;
                 _dataBall.UpdateVelocity(newVelocityX, newVelocityY);
-                _logger.Log(new WallCollisionLog
+                _logger.Log(new LogMessage
                 {
-                    BallId = GetHashCode(),
-                    PosX = newX,
-                    PosY = newY,
-                    VelX = newVelocityX,
-                    VelY = newVelocityY,
-                    Mass = Mass,
-                    Wall = "Right"
+                    MessageType = LogMessageType.WallCollisionRight,
+                    Ball1 = new BallData
+                    {
+                        BallId = _dataBall.GetHashCode(),
+                        PosX = newX,
+                        PosY = newY,
+                        VelX = newVelocityX,
+                        VelY = newVelocityY,
+                        Mass = Mass
+                    }
                 });
             }
             if (newY - Radius <= 0 && velocity.y < 0)
@@ -140,15 +153,18 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 newVelocityX = velocity.x;
                 newVelocityY = -velocity.y;
                 _dataBall.UpdateVelocity(newVelocityX, newVelocityY);
-                _logger.Log(new WallCollisionLog
+                _logger.Log(new LogMessage
                 {
-                    BallId = GetHashCode(),
-                    PosX = newX,
-                    PosY = newY,
-                    VelX = newVelocityX,
-                    VelY = newVelocityY,
-                    Mass = Mass,
-                    Wall = "Top"
+                    MessageType = LogMessageType.WallCollisionTop,
+                    Ball1 = new BallData
+                    {
+                        BallId = _dataBall.GetHashCode(),
+                        PosX = newX,
+                        PosY = newY,
+                        VelX = newVelocityX,
+                        VelY = newVelocityY,
+                        Mass = Mass
+                    }
                 });
             }
             else if (newY + Radius >= _tableHeight - borderThickness && velocity.y > 0)
@@ -156,15 +172,18 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 newVelocityX = velocity.x;
                 newVelocityY = -velocity.y;
                 _dataBall.UpdateVelocity(newVelocityX, newVelocityY);
-                _logger.Log(new WallCollisionLog
+                _logger.Log(new LogMessage
                 {
-                    BallId = GetHashCode(),
-                    PosX = newX,
-                    PosY = newY,
-                    VelX = newVelocityX,
-                    VelY = newVelocityY,
-                    Mass = Mass,
-                    Wall = "Bottom"
+                    MessageType = LogMessageType.WallCollisionBottom,
+                    Ball1 = new BallData
+                    {
+                        BallId = _dataBall.GetHashCode(),
+                        PosX = newX,
+                        PosY = newY,
+                        VelX = newVelocityX,
+                        VelY = newVelocityY,
+                        Mass = Mass
+                    }
                 });
             }
         }

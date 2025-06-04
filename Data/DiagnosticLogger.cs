@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace TP.ConcurrentProgramming.Data
 {
@@ -57,6 +58,12 @@ namespace TP.ConcurrentProgramming.Data
 
         private void LogToFile()
         {
+            var options = new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                Converters = { new JsonStringEnumConverter() }
+            };
+
             while (_isRunning)
             {
                 if (_logBuffer.TryTake(out var message))
@@ -65,13 +72,7 @@ namespace TP.ConcurrentProgramming.Data
                     {
                         try
                         {
-                            string jsonMessage = message switch
-                            {
-                                BallPositionLog ballPosition => JsonSerializer.Serialize(ballPosition),
-                                BallCollisionLog ballCollision => JsonSerializer.Serialize(ballCollision),
-                                WallCollisionLog wallCollision => JsonSerializer.Serialize(wallCollision),
-                                _ => throw new InvalidOperationException($"Unknown LogMessage type: {message?.GetType().Name}")
-                            };
+                            string jsonMessage = JsonSerializer.Serialize(message, options);
                             logWriter.WriteLine(jsonMessage);
                         }
                         catch (IOException ex)
@@ -168,13 +169,15 @@ namespace TP.ConcurrentProgramming.Data
         }
     }
 
-    public abstract class LogMessage
+    public class LogMessage
     {
         public DateTime Timestamp { get; set; }
-        public abstract string MessageType { get; }
+        public LogMessageType MessageType { get; set; }
+        public BallData? Ball1 { get; set; }
+        public BallData? Ball2 { get; set; }
     }
 
-    public class BallPositionLog : LogMessage
+    public class BallData
     {
         public int BallId { get; set; }
         public double PosX { get; set; }
@@ -182,36 +185,16 @@ namespace TP.ConcurrentProgramming.Data
         public double VelX { get; set; }
         public double VelY { get; set; }
         public double Mass { get; set; }
-        public double DeltaTime { get; set; }
-        public override string MessageType => "BallPosition";
+        public double? DeltaTime { get; set; }
     }
 
-    public class BallCollisionLog : LogMessage
+    public enum LogMessageType
     {
-        public int Ball1Id { get; set; }
-        public double Ball1PosX { get; set; }
-        public double Ball1PosY { get; set; }
-        public double Ball1VelX { get; set; }
-        public double Ball1VelY { get; set; }
-        public double Ball1Mass { get; set; }
-        public int Ball2Id { get; set; }
-        public double Ball2PosX { get; set; }
-        public double Ball2PosY { get; set; }
-        public double Ball2VelX { get; set; }
-        public double Ball2VelY { get; set; }
-        public double Ball2Mass { get; set; }
-        public override string MessageType => "BallCollision";
-    }
-
-    public class WallCollisionLog : LogMessage
-    {
-        public int BallId { get; set; }
-        public double PosX { get; set; }
-        public double PosY { get; set; }
-        public double VelX { get; set; }
-        public double VelY { get; set; }
-        public double Mass { get; set; }
-        public string Wall { get; set; } = string.Empty;
-        public override string MessageType => "WallCollision";
+        BallMovement,
+        BallToBallCollision,
+        WallCollisionTop,
+        WallCollisionBottom,
+        WallCollisionLeft,
+        WallCollisionRight
     }
 }
