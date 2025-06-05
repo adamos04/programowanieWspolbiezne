@@ -76,8 +76,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
             _dataBall.UpdateVelocity(newXVel, newYVel);
             other._dataBall.UpdateVelocity(newOtherXVel, newOtherYVel);
-            _logger.Log(1, _dataBall.GetHashCode(), myPosition.x, myPosition.y, newXVel, newYVel, m1, null,
-                        _dataBall.GetHashCode(), otherPosition.x, otherPosition.y, newOtherXVel, newOtherYVel, m2);
+            _logger.Log(1, _dataBall.GetHashCode(), myPosition, newXVel, newYVel, m1,
+                        other._dataBall.GetHashCode(), otherPosition, newOtherXVel, newOtherYVel, m2);
         }
 
         internal void CheckWallCollisions(Data.IVector position)
@@ -94,28 +94,28 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 newVelocityX = -velocity.x;
                 newVelocityY = velocity.y;
                 _dataBall.UpdateVelocity(newVelocityX, newVelocityY);
-                _logger.Log(2, _dataBall.GetHashCode(), newX, newY, newVelocityX, newVelocityY, Mass, null, null, null, null, null, null, null);
+                _logger.Log(2, _dataBall.GetHashCode(), position, newVelocityX, newVelocityY, Mass);
             }
             else if (newX + Radius >= _tableWidth - borderThickness && velocity.x > 0)
             {
                 newVelocityX = -velocity.x;
                 newVelocityY = velocity.y;
                 _dataBall.UpdateVelocity(newVelocityX, newVelocityY);
-                _logger.Log(3, _dataBall.GetHashCode(), newX, newY, newVelocityX, newVelocityY, Mass, null, null, null, null, null, null, null);
+                _logger.Log(3, _dataBall.GetHashCode(), position, newVelocityX, newVelocityY, Mass);
             }
             if (newY - Radius <= 0 && velocity.y < 0)
             {
                 newVelocityX = velocity.x;
                 newVelocityY = -velocity.y;
                 _dataBall.UpdateVelocity(newVelocityX, newVelocityY);
-                _logger.Log(4, _dataBall.GetHashCode(), newX, newY, newVelocityX, newVelocityY, Mass, null, null, null, null, null, null, null);
+                _logger.Log(4, _dataBall.GetHashCode(), position, newVelocityX, newVelocityY, Mass);
             }
             else if (newY + Radius >= _tableHeight - borderThickness && velocity.y > 0)
             {
                 newVelocityX = velocity.x;
                 newVelocityY = -velocity.y;
                 _dataBall.UpdateVelocity(newVelocityX, newVelocityY);
-                _logger.Log(5, _dataBall.GetHashCode(), newX, newY, newVelocityX, newVelocityY, Mass, null, null, null, null, null, null, null);
+                _logger.Log(5, _dataBall.GetHashCode(), position, newVelocityX, newVelocityY, Mass);
             }
         }
         #endregion

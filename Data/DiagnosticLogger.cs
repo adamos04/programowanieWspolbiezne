@@ -44,7 +44,8 @@ namespace TP.ConcurrentProgramming.Data
             _logThread.Start();
         }
 
-        public void Log(int messageType, int ball1Id, double ball1PosX, double ball1PosY, double ball1VelX, double ball1VelY, double ball1Mass, double? deltaTime, int? ball2Id, double? ball2PosX, double? ball2PosY, double? ball2VelX, double? ball2VelY, double? ball2Mass)
+        public void Log(int messageType, int ball1Id, IVector ball1Pos, double ball1VelX, double ball1VelY, double ball1Mass,
+                int? ball2Id = null, IVector? ball2Pos = null, double? ball2VelX = null, double? ball2VelY = null, double? ball2Mass = null)
         {
             if (_isRunning && !_disposed)
             {
@@ -61,21 +62,20 @@ namespace TP.ConcurrentProgramming.Data
                     Ball1 = new BallData
                     {
                         BallId = ball1Id,
-                        PosX = ball1PosX,
-                        PosY = ball1PosY,
-                        VelX = ball1VelX,
-                        VelY = ball1VelY,
-                        Mass = ball1Mass,
-                        DeltaTime = deltaTime
+                        PosX = Math.Round(ball1Pos.x, 2),
+                        PosY = Math.Round(ball1Pos.y, 2),
+                        VelX = Math.Round(ball1VelX, 2),
+                        VelY = Math.Round(ball1VelY, 2),
+                        Mass = Math.Round(ball1Mass, 2)
                     },
                     Ball2 = ball2Id.HasValue ? new BallData
                     {
                         BallId = ball2Id.Value,
-                        PosX = ball2PosX ?? 0,
-                        PosY = ball2PosY ?? 0,
-                        VelX = ball2VelX ?? 0,
-                        VelY = ball2VelY ?? 0,
-                        Mass = ball2Mass ?? 0
+                        PosX = Math.Round(ball2Pos?.x ?? 0, 2),
+                        PosY = Math.Round(ball2Pos?.y ?? 0, 2),
+                        VelX = Math.Round(ball2VelX ?? 0, 2),
+                        VelY = Math.Round(ball2VelY ?? 0, 2),
+                        Mass = Math.Round(ball2Mass ?? 0, 2)
                     } : null
                 };
                 if (!_logBuffer.TryAdd(logMessage))
