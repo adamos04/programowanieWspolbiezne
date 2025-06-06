@@ -14,8 +14,8 @@ namespace TP.ConcurrentProgramming.Data
         private volatile bool _isRunning = true;
         private readonly string _logFilePath;
         private readonly StreamWriter logWriter;
-        private readonly object _fileLock = new object();
         private readonly DiagnosticBuffer _logBuffer;
+        private readonly AutoResetEvent _bufferEvent = new AutoResetEvent(false);
         private bool _disposed = false;
 
         private DiagnosticLogger()
@@ -78,9 +78,9 @@ namespace TP.ConcurrentProgramming.Data
                         Mass = Math.Round(ball2Mass ?? 0, 2)
                     } : null
                 };
-                if (!_logBuffer.TryAdd(logMessage))
+                if (_logBuffer.TryAdd(logMessage))
                 {
-                    System.Diagnostics.Debug.WriteLine("Bufor logów pełny, odrzucono wiadomość.");
+                    _bufferEvent.Set();
                 }
             }
         }
@@ -97,22 +97,19 @@ namespace TP.ConcurrentProgramming.Data
             {
                 if (_logBuffer.TryTake(out var message))
                 {
-                    lock (_fileLock)
+                    try
                     {
-                        try
-                        {
-                            string jsonMessage = JsonSerializer.Serialize(message, options);
-                            logWriter.WriteLine(jsonMessage);
-                        }
-                        catch (IOException ex)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Błąd zapisu do logu: {ex.Message}");
-                        }
+                        string jsonMessage = JsonSerializer.Serialize(message, options);
+                        logWriter.WriteLine(jsonMessage);
+                    }
+                    catch (IOException ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Błąd zapisu do logu: {ex.Message}");
                     }
                 }
                 else
                 {
-                    Thread.Sleep(10);
+                    _bufferEvent.WaitOne();
                 }
             }
         }
@@ -130,6 +127,11 @@ namespace TP.ConcurrentProgramming.Data
                 if (disposing)
                 {
                     _isRunning = false;
+                    _bufferEvent.Set();
+                    while (_logBuffer.Count > 0)
+                    {
+                        _bufferEvent.WaitOne(100);
+                    }
                     _logThread.Join();
                     try
                     {
@@ -153,6 +155,7 @@ namespace TP.ConcurrentProgramming.Data
         private int _count;
         private readonly int _capacity;
         private readonly object _bufferLock = new object();
+        internal int Count => _count;
 
         public DiagnosticBuffer(int capacity)
         {
