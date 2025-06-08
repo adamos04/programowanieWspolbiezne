@@ -7,8 +7,8 @@ namespace TP.ConcurrentProgramming.Data
 {
     internal class DiagnosticLogger : ILogger, IDisposable
     {
-        private static readonly DiagnosticLogger _instance = new DiagnosticLogger();
-        public static DiagnosticLogger Instance => _instance;
+        private static readonly Lazy<DiagnosticLogger> _lazyInstance = new Lazy<DiagnosticLogger>(() => new DiagnosticLogger());
+        public static DiagnosticLogger Instance => _lazyInstance.Value;
 
         private readonly Thread _logThread;
         private volatile bool _isRunning = true;
