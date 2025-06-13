@@ -48,7 +48,6 @@ namespace TP.ConcurrentProgramming.Data
             _disposed = true;
 
             _isRunning = false;
-            _moveThread?.Join();
         }
         #endregion
 
@@ -76,7 +75,6 @@ namespace TP.ConcurrentProgramming.Data
         internal void StartMoving()
         {
             _moveThread = new Thread(new ThreadStart(MoveContinuously));
-            _moveThread.IsBackground = true;
             _moveThread.Start();
         }
 

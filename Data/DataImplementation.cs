@@ -15,7 +15,7 @@ namespace TP.ConcurrentProgramming.Data
     internal class DataImplementation : DataAbstractAPI
     {
         #region DataAbstractAPI
-        public override void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, IBall> upperLayerHandler)
+        public override void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, IBall> upperLayerHandler, ILogger logger)
         {
             if (Disposed)
                 throw new ObjectDisposedException(nameof(DataImplementation));
@@ -24,7 +24,6 @@ namespace TP.ConcurrentProgramming.Data
 
             double minDimension = Math.Min(tableWidth, tableHeight);
             double radius = 0.04 * tableHeight;
-            ILogger logger = DiagnosticLogger.GetInstance();
 
             Random random = new Random();
             List<Ball> tempBalls = new List<Ball>();
@@ -79,6 +78,11 @@ namespace TP.ConcurrentProgramming.Data
         }
         #endregion
 
+        public override ILogger GetLogger()
+        {
+            return DiagnosticLogger.LoggerInstance;
+        }
+
         #region IDisposable
         protected virtual void Dispose(bool disposing)
         {
@@ -86,15 +90,7 @@ namespace TP.ConcurrentProgramming.Data
             {
                 if (disposing)
                 {
-                    lock (_lock)
-                    {
-                        foreach (var ball in BallsList)
-                        {
-                            ball.Dispose();
-                        }
-                        BallsList.Clear();
-                    }
-                    DiagnosticLogger.GetInstance().Dispose();
+                    BallsList.Clear();
                 }
                 Disposed = true;
             }

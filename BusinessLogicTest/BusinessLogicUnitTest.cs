@@ -29,18 +29,18 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
     [TestMethod]
     public void DisposeTestMethod()
     {
-      DataLayerDisposeFixcure dataLayerFixcure = new();
-      BusinessLogicImplementation newInstance = new(dataLayerFixcure);
-      Assert.IsFalse(dataLayerFixcure.Disposed);
-      bool newInstanceDisposed = true;
-      newInstance.CheckObjectDisposed(x => newInstanceDisposed = x);
-      Assert.IsFalse(newInstanceDisposed);
-      newInstance.Dispose();
-      newInstance.CheckObjectDisposed(x => newInstanceDisposed = x);
-      Assert.IsTrue(newInstanceDisposed);
-      Assert.ThrowsException<ObjectDisposedException>(() => newInstance.Dispose());
-      Assert.ThrowsException<ObjectDisposedException>(() => newInstance.Start(0, 200, 200, (position, ball) => { }));
-      Assert.IsTrue(dataLayerFixcure.Disposed);
+        DataLayerDisposeFixcure dataLayerFixcure = new DataLayerDisposeFixcure();
+        BusinessLogicImplementation newInstance = new(dataLayerFixcure);
+        Assert.IsFalse(dataLayerFixcure.Disposed);
+        bool newInstanceDisposed = true;
+        newInstance.CheckObjectDisposed(x => newInstanceDisposed = x);
+        Assert.IsFalse(newInstanceDisposed);
+        newInstance.Dispose();
+        newInstance.CheckObjectDisposed(x => newInstanceDisposed = x);
+        Assert.IsTrue(newInstanceDisposed);
+        Assert.ThrowsException<ObjectDisposedException>(() => newInstance.Dispose());
+        Assert.ThrowsException<ObjectDisposedException>(() => newInstance.Start(0, 200, 200, (position, ball) => { }));
+        Assert.IsTrue(dataLayerFixcure.Disposed);
     }
 
     [TestMethod]
@@ -69,11 +69,16 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
       public override void Dispose()
       { }
 
-      public override void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, Data.IBall> upperLayerHandler)
+      public override void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, Data.IBall> upperLayerHandler, Data.ILogger logger)
       {
         throw new NotImplementedException();
       }
-    }
+
+            public override Data.ILogger GetLogger()
+            {
+                throw new NotImplementedException();
+            }
+        }
 
     private class DataLayerDisposeFixcure : Data.DataAbstractAPI
     {
@@ -84,11 +89,16 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
         Disposed = true;
       }
 
-      public override void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, Data.IBall> upperLayerHandler)
+      public override void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, Data.IBall> upperLayerHandler, Data.ILogger logger)
       {
         throw new NotImplementedException();
       }
-    }
+
+            public override Data.ILogger GetLogger()
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         private class DataLayerStartFixcure : Data.DataAbstractAPI
         {
@@ -98,11 +108,29 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
             public override void Dispose()
             { }
 
-            public override void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, Data.IBall> upperLayerHandler)
+            public override void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, Data.IBall> upperLayerHandler, Data.ILogger logger)
             {
                 StartCalled = true;
                 NumberOfBallseCreated = numberOfBalls;
                 upperLayerHandler(new DataVectorFixture(), new DataBallFixture { Velocity = new DataVectorFixture(),});
+            }
+
+            public override Data.ILogger GetLogger()
+            {
+                return new LoggerFix();
+            }
+
+            private class LoggerFix : ILogger
+            {
+                public void Log(int messageType, int ball1Id, IVector ball1Pos, double ball1VelX, double ball1VelY, double ball1Mass,
+                    int? ball2Id = null, IVector? ball2Pos = null, double? ball2VelX = null, double? ball2VelY = null, double? ball2Mass = null)
+                {
+
+                }
+                public void Dispose()
+                {
+
+                }
             }
 
             private record DataVectorFixture : Data.IVector

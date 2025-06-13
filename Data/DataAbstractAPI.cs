@@ -16,13 +16,9 @@ namespace TP.ConcurrentProgramming.Data
         {
             return modelInstance.Value;
         }
+        public abstract ILogger GetLogger();
 
-        public ILogger GetLogger()
-        {
-            return DiagnosticLogger.GetInstance();
-        }
-
-        public abstract void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, IBall> upperLayerHandler);
+        public abstract void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, IBall> upperLayerHandler, ILogger logger);
 
         public abstract void Dispose();
 

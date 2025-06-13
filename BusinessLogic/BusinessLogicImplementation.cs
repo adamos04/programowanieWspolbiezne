@@ -24,7 +24,6 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
         {
             layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
-            logger = layerBellow.GetLogger();
         }
         #endregion
 
@@ -33,18 +32,9 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         {
             if (Disposed)
                 throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
-            Ball[] ballsToDispose;
-            lock (_lock)
-            {
-                ballsToDispose = BallsList.ToArray();
-                BallsList.Clear();
-            }
-            foreach (var ball in ballsToDispose)
-            {
-                ball.Dispose();
-            }
+            DisposeBalls();
             layerBellow.Dispose();
-            logger.Dispose();
+            logger?.Dispose();
             Disposed = true;
         }
 
@@ -56,6 +46,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 throw new ArgumentNullException(nameof(upperLayerHandler));
 
             double radius = 0.04 * tableHeight;
+            logger = layerBellow.GetLogger();
             layerBellow.Start(numberOfBalls, tableWidth, tableHeight, (startingPosition, databall) =>
             {
                 lock (_lock)
@@ -64,7 +55,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                     upperLayerHandler(new Position(startingPosition.x, startingPosition.y), logicBall);
                     BallsList.Add(logicBall);
                 }
-            });
+            }, logger);
         }
         #endregion
 
@@ -72,8 +63,16 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         private bool Disposed = false;
         private readonly UnderneathLayerAPI layerBellow;
         private ILogger logger;
-        private readonly List<Ball> BallsList = [];
+        private List<Ball> BallsList = new List<Ball>();
         private readonly object _lock = new();
+
+        private void DisposeBalls()
+        {
+            foreach (var ball in BallsList)
+            {
+                ball.Dispose();
+            }
+        }
         #endregion
 
         #region TestingInfrastructure

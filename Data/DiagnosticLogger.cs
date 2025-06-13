@@ -7,7 +7,7 @@ namespace TP.ConcurrentProgramming.Data
 {
     internal class DiagnosticLogger : ILogger, IDisposable
     {
-        private static readonly Lazy<DiagnosticLogger> instance = new Lazy<DiagnosticLogger>(() => new DiagnosticLogger());
+        private static readonly Lazy<DiagnosticLogger> singletonInstance = new Lazy<DiagnosticLogger>(() => new DiagnosticLogger());
         private readonly Thread _logThread;
         private volatile bool _isRunning = true;
         private readonly string _logFilePath;
@@ -15,11 +15,6 @@ namespace TP.ConcurrentProgramming.Data
         private readonly DiagnosticBuffer _logBuffer;
         private readonly AutoResetEvent _bufferEvent = new AutoResetEvent(false);
         private bool _disposed = false;
-
-        internal static DiagnosticLogger GetInstance()
-        {
-            return instance.Value;
-        }
 
         private DiagnosticLogger()
         {
@@ -47,6 +42,13 @@ namespace TP.ConcurrentProgramming.Data
             _logThread.Start();
         }
 
+        internal static DiagnosticLogger LoggerInstance
+        {
+            get
+            {
+                return singletonInstance.Value;
+            }
+        }
         public void Log(int messageType, int ball1Id, IVector ball1Pos, double ball1VelX, double ball1VelY, double ball1Mass,
                 int? ball2Id = null, IVector? ball2Pos = null, double? ball2VelX = null, double? ball2VelY = null, double? ball2Mass = null)
         {
@@ -132,7 +134,6 @@ namespace TP.ConcurrentProgramming.Data
                     {
                         _bufferEvent.WaitOne(100);
                     }
-                    _logThread.Join();
                     try
                     {
                         logWriter?.Dispose();
