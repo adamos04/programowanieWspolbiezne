@@ -16,13 +16,14 @@ namespace TP.ConcurrentProgramming.Data
     internal class Ball : IBall
     {
         #region ctor
-        internal Ball(Vector initialPosition, Vector initialVelocity)
+        internal Ball(Vector initialPosition, Vector initialVelocity, ILogger logger)
         {
             _position = initialPosition;
             _velocity = initialVelocity;
             Mass = new Random().NextDouble() * 3 + 3;
             _isRunning = true;
             _moveThread = null!;
+            this.logger = logger;
         }
         #endregion
 
@@ -57,7 +58,7 @@ namespace TP.ConcurrentProgramming.Data
         private Thread? _moveThread;
         private volatile bool _isRunning;
         private bool _disposed = false;
-        private readonly DiagnosticLogger _logger = DiagnosticLogger.Instance;
+        private readonly ILogger logger;
 
         private void RaiseNewPositionChangeNotification()
         {
@@ -68,7 +69,7 @@ namespace TP.ConcurrentProgramming.Data
         {
             Vector velocity = (Vector)Velocity;
             _position = new Vector(_position.x + velocity.x * deltaTime, _position.y + velocity.y * deltaTime);
-            _logger.Log(0, GetHashCode(), _position, velocity.x, velocity.y, Mass);
+            logger.Log(0, GetHashCode(), _position, velocity.x, velocity.y, Mass);
             RaiseNewPositionChangeNotification();
         }
 

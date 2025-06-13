@@ -17,9 +17,9 @@ namespace TP.ConcurrentProgramming.Data
             return modelInstance.Value;
         }
 
-        public static ILogger GetLogger()
+        public ILogger GetLogger()
         {
-            return DiagnosticLogger.Instance;
+            return DiagnosticLogger.GetInstance();
         }
 
         public abstract void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, IBall> upperLayerHandler);

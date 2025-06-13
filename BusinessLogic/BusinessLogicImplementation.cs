@@ -23,8 +23,8 @@ namespace TP.ConcurrentProgramming.BusinessLogic
 
         internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
         {
-            layerBellow = underneathLayer ?? UnderneathLayerAPI.GetDataLayer();
-            _logger = UnderneathLayerAPI.GetLogger();
+            layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
+            logger = layerBellow.GetLogger();
         }
         #endregion
 
@@ -44,7 +44,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 ball.Dispose();
             }
             layerBellow.Dispose();
-            _logger.Dispose();
+            logger.Dispose();
             Disposed = true;
         }
 
@@ -56,12 +56,11 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 throw new ArgumentNullException(nameof(upperLayerHandler));
 
             double radius = 0.04 * tableHeight;
-
             layerBellow.Start(numberOfBalls, tableWidth, tableHeight, (startingPosition, databall) =>
             {
                 lock (_lock)
                 {
-                    Ball logicBall = new Ball(databall, BallsList, _lock, tableWidth, tableHeight, radius, _logger);
+                    Ball logicBall = new Ball(databall, BallsList, _lock, tableWidth, tableHeight, radius, logger);
                     upperLayerHandler(new Position(startingPosition.x, startingPosition.y), logicBall);
                     BallsList.Add(logicBall);
                 }
@@ -72,7 +71,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         #region private
         private bool Disposed = false;
         private readonly UnderneathLayerAPI layerBellow;
-        private readonly ILogger _logger;
+        private ILogger logger;
         private readonly List<Ball> BallsList = [];
         private readonly object _lock = new();
         #endregion

@@ -7,9 +7,7 @@ namespace TP.ConcurrentProgramming.Data
 {
     internal class DiagnosticLogger : ILogger, IDisposable
     {
-        private static readonly Lazy<DiagnosticLogger> _lazyInstance = new Lazy<DiagnosticLogger>(() => new DiagnosticLogger());
-        public static DiagnosticLogger Instance => _lazyInstance.Value;
-
+        private static readonly Lazy<DiagnosticLogger> instance = new Lazy<DiagnosticLogger>(() => new DiagnosticLogger());
         private readonly Thread _logThread;
         private volatile bool _isRunning = true;
         private readonly string _logFilePath;
@@ -17,6 +15,11 @@ namespace TP.ConcurrentProgramming.Data
         private readonly DiagnosticBuffer _logBuffer;
         private readonly AutoResetEvent _bufferEvent = new AutoResetEvent(false);
         private bool _disposed = false;
+
+        internal static DiagnosticLogger GetInstance()
+        {
+            return instance.Value;
+        }
 
         private DiagnosticLogger()
         {
@@ -39,7 +42,7 @@ namespace TP.ConcurrentProgramming.Data
             }
 
             logWriter = new StreamWriter(_logFilePath, append: true, Encoding.UTF8) { AutoFlush = true };
-            _logBuffer = new DiagnosticBuffer(1000);
+            _logBuffer = new DiagnosticBuffer(1000, _bufferEvent);
             _logThread = new Thread(LogToFile);
             _logThread.Start();
         }
@@ -78,10 +81,7 @@ namespace TP.ConcurrentProgramming.Data
                         Mass = Math.Round(ball2Mass ?? 0, 2)
                     } : null
                 };
-                if (_logBuffer.TryAdd(logMessage))
-                {
-                    _bufferEvent.Set();
-                }
+                _logBuffer.TryAdd(logMessage);
             }
         }
 
@@ -155,15 +155,18 @@ namespace TP.ConcurrentProgramming.Data
         private int _count;
         private readonly int _capacity;
         private readonly object _bufferLock = new object();
+
+        private readonly AutoResetEvent _bufferEvent;
         internal int Count => _count;
 
-        public DiagnosticBuffer(int capacity)
+        public DiagnosticBuffer(int capacity, AutoResetEvent bufferEvent)
         {
             _capacity = capacity;
             _buffer = new LogMessage?[capacity];
             _head = 0;
             _tail = 0;
             _count = 0;
+            _bufferEvent = bufferEvent;
         }
 
         public bool TryAdd(LogMessage item)
@@ -178,6 +181,7 @@ namespace TP.ConcurrentProgramming.Data
                 _buffer[_tail] = item;
                 _tail = (_tail + 1) % _capacity;
                 _count++;
+                _bufferEvent.Set();
                 return true;
             }
         }
@@ -196,6 +200,10 @@ namespace TP.ConcurrentProgramming.Data
                 _buffer[_head] = null;
                 _head = (_head + 1) % _capacity;
                 _count--;
+                if (_count == 0)
+                {
+                    _bufferEvent.Set();
+                }
                 return true;
             }
         }

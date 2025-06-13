@@ -24,6 +24,7 @@ namespace TP.ConcurrentProgramming.Data
 
             double minDimension = Math.Min(tableWidth, tableHeight);
             double radius = 0.04 * tableHeight;
+            ILogger logger = DiagnosticLogger.GetInstance();
 
             Random random = new Random();
             List<Ball> tempBalls = new List<Ball>();
@@ -62,7 +63,7 @@ namespace TP.ConcurrentProgramming.Data
                 } while (!positionValid);
 
                 Vector velocity = new Vector((random.NextDouble() - 0.5) * 250, (random.NextDouble() - 0.5) * 250);
-                Ball newBall = new Ball(startingPosition, velocity);
+                Ball newBall = new Ball(startingPosition, velocity, logger);
                 upperLayerHandler(startingPosition, newBall);
                 if (newBall is Ball ballImplementation)
                 {
@@ -93,7 +94,7 @@ namespace TP.ConcurrentProgramming.Data
                         }
                         BallsList.Clear();
                     }
-                    DiagnosticLogger.Instance.Dispose();
+                    DiagnosticLogger.GetInstance().Dispose();
                 }
                 Disposed = true;
             }
