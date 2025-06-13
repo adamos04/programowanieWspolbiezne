@@ -16,7 +16,7 @@ namespace TP.ConcurrentProgramming.Data
         {
             return modelInstance.Value;
         }
-        public abstract ILogger GetLogger();
+        
 
         public abstract void Start(int numberOfBalls, double tableWidth, double tableHeight, Action<IVector, IBall> upperLayerHandler, ILogger logger);
 
@@ -39,9 +39,5 @@ namespace TP.ConcurrentProgramming.Data
         IVector Position { get; }
         void UpdateVelocity(double x, double y);
     }
-    public interface ILogger : IDisposable
-    {
-        public void Log(int messageType, int ball1Id, IVector ball1Pos, double ball1VelX, double ball1VelY, double ball1Mass, 
-                int? ball2Id = null, IVector? ball2Pos = null, double? ball2VelX = null, double? ball2VelY = null, double? ball2Mass = null);
-    }
+
 }

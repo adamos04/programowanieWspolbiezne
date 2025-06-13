@@ -10,6 +10,7 @@
 
 using System.Diagnostics;
 using UnderneathLayerAPI = TP.ConcurrentProgramming.Data.DataAbstractAPI;
+using LoggerLayerAPI = TP.ConcurrentProgramming.Data.LoggerAbstractAPI;
 using TP.ConcurrentProgramming.Data;
 
 namespace TP.ConcurrentProgramming.BusinessLogic
@@ -17,13 +18,15 @@ namespace TP.ConcurrentProgramming.BusinessLogic
     internal class BusinessLogicImplementation : BusinessLogicAbstractAPI
     {
         #region ctor
-        public BusinessLogicImplementation() : this(null)
+        public BusinessLogicImplementation() : this(null, null)
         {
         }
 
-        internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer)
+        internal BusinessLogicImplementation(UnderneathLayerAPI? underneathLayer, LoggerLayerAPI? loggerLayer)
         {
             layerBellow = underneathLayer == null ? UnderneathLayerAPI.GetDataLayer() : underneathLayer;
+            _loggerAPI = loggerLayer ?? LoggerLayerAPI.GetLoggerLayer();
+
         }
         #endregion
 
@@ -34,7 +37,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 throw new ObjectDisposedException(nameof(BusinessLogicImplementation));
             DisposeBalls();
             layerBellow.Dispose();
-            logger?.Dispose();
+            _loggerAPI.Dispose();
             Disposed = true;
         }
 
@@ -46,7 +49,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
                 throw new ArgumentNullException(nameof(upperLayerHandler));
 
             double radius = 0.04 * tableHeight;
-            logger = layerBellow.GetLogger();
+            ILogger logger = _loggerAPI.GetLogger();
             layerBellow.Start(numberOfBalls, tableWidth, tableHeight, (startingPosition, databall) =>
             {
                 lock (_lock)
@@ -62,7 +65,7 @@ namespace TP.ConcurrentProgramming.BusinessLogic
         #region private
         private bool Disposed = false;
         private readonly UnderneathLayerAPI layerBellow;
-        private ILogger logger;
+        private readonly LoggerLayerAPI _loggerAPI;
         private List<Ball> BallsList = new List<Ball>();
         private readonly object _lock = new();
 

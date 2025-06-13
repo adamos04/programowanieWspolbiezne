@@ -78,10 +78,6 @@ namespace TP.ConcurrentProgramming.Data
         }
         #endregion
 
-        public override ILogger GetLogger()
-        {
-            return DiagnosticLogger.LoggerInstance;
-        }
 
         #region IDisposable
         protected virtual void Dispose(bool disposing)
