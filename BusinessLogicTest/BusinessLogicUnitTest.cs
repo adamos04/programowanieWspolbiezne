@@ -121,8 +121,16 @@ namespace TP.ConcurrentProgramming.BusinessLogic.Test
 
             private class LoggerFix : ILogger
             {
-                public void Log(int messageType, int ball1Id, IVector ball1Pos, double ball1VelX, double ball1VelY, double ball1Mass,
-                    int? ball2Id = null, IVector? ball2Pos = null, double? ball2VelX = null, double? ball2VelY = null, double? ball2Mass = null)
+                public void Log(int ballId, IVector position, double velX, double velY, double mass)
+                {
+                }
+
+                public void LogBallCollision(int ball1Id, IVector ball1Pos, double ball1VelX, double ball1VelY, double ball1Mass,
+                                             int ball2Id, IVector ball2Pos, double ball2VelX, double ball2VelY, double ball2Mass)
+                {
+                }
+
+                public void LogWallCollision(int ballId, IVector position, double velX, double velY, double mass)
                 {
                 }
 

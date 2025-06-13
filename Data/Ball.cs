@@ -68,7 +68,7 @@ namespace TP.ConcurrentProgramming.Data
         {
             Vector velocity = (Vector)Velocity;
             _position = new Vector(_position.x + velocity.x * deltaTime, _position.y + velocity.y * deltaTime);
-            logger.Log(0, GetHashCode(), _position, velocity.x, velocity.y, Mass);
+            logger.Log(GetHashCode(), _position, velocity.x, velocity.y, Mass);
             RaiseNewPositionChangeNotification();
         }
 
