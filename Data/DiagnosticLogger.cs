@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -10,14 +11,32 @@ namespace TP.ConcurrentProgramming.Data
         private static readonly Lazy<DiagnosticLogger> singletonInstance = new Lazy<DiagnosticLogger>(() => new DiagnosticLogger());
         private readonly Thread _logThread;
         private volatile bool _isRunning = true;
-        private readonly string _logFilePath;
-        private readonly StreamWriter logWriter;
+        private string _logFilePath;
+        private StreamWriter logWriter;
         private readonly DiagnosticBuffer _logBuffer;
         private readonly AutoResetEvent _bufferEvent = new AutoResetEvent(false);
         private bool _disposed = false;
 
         private DiagnosticLogger()
         {
+            _logBuffer = new DiagnosticBuffer(1000, _bufferEvent);
+            _logThread = new Thread(LogToFile);
+            _logThread.Start();
+        }
+
+        internal static DiagnosticLogger LoggerInstance
+        {
+            get
+            {
+                return singletonInstance.Value;
+            }
+        }
+
+        private void InitializeFile()
+        {
+            if (logWriter != null)
+                return;
+
             string projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\.."));
             string logsDirectory = Path.Combine(projectDirectory, "Logs");
             Directory.CreateDirectory(logsDirectory);
@@ -37,17 +56,6 @@ namespace TP.ConcurrentProgramming.Data
             }
 
             logWriter = new StreamWriter(_logFilePath, append: true, Encoding.UTF8) { AutoFlush = true };
-            _logBuffer = new DiagnosticBuffer(1000, _bufferEvent);
-            _logThread = new Thread(LogToFile);
-            _logThread.Start();
-        }
-
-        internal static DiagnosticLogger LoggerInstance
-        {
-            get
-            {
-                return singletonInstance.Value;
-            }
         }
         public void Log(int messageType, int ball1Id, IVector ball1Pos, double ball1VelX, double ball1VelY, double ball1Mass,
                 int? ball2Id = null, IVector? ball2Pos = null, double? ball2VelX = null, double? ball2VelY = null, double? ball2Mass = null)
@@ -99,6 +107,7 @@ namespace TP.ConcurrentProgramming.Data
             {
                 if (_logBuffer.TryTake(out var message))
                 {
+                    InitializeFile();
                     try
                     {
                         string jsonMessage = JsonSerializer.Serialize(message, options);
