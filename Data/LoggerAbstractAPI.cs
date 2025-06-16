@@ -20,10 +20,10 @@ namespace TP.ConcurrentProgramming.Data
 
     public interface ILogger : IDisposable
     {
-        void Log(int ballId, IVector position, double velX, double velY, double mass);
-        void LogBallCollision(int ball1Id, IVector ball1Pos, double ball1VelX, double ball1VelY, double ball1Mass,
+        void Log(DateTime timestamp, int ballId, IVector position, double velX, double velY, double mass);
+        void LogBallCollision(DateTime timestamp, int ball1Id, IVector ball1Pos, double ball1VelX, double ball1VelY, double ball1Mass,
                               int ball2Id, IVector ball2Pos, double ball2VelX, double ball2VelY, double ball2Mass);
-        void LogWallCollision(int ballId, IVector position, double velX, double velY, double mass);
+        void LogWallCollision(DateTime timestamp, int ballId, IVector position, double velX, double velY, double mass);
     }
 
     internal class LoggerImplementation : LoggerAbstractAPI

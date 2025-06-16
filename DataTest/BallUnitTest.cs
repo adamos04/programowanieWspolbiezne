@@ -16,17 +16,17 @@ namespace TP.ConcurrentProgramming.Data.Test
         [TestMethod]
         public void ConstructorTestMethod()
         {
-            LoggerFix lgr = new LoggerFix();
+            LoggerFix logger = new LoggerFix();
             Vector testinVector = new(0.0, 0.0);
-            Ball newInstance = new(testinVector, testinVector, lgr);
+            Ball newInstance = new(testinVector, testinVector, logger);
         }
 
         [TestMethod]
         public void MoveTestMethod()
         {
-            LoggerFix lgr = new LoggerFix();
+            LoggerFix logger = new LoggerFix();
             Vector initialPosition = new(10.0, 10.0);
-            Ball newInstance = new(initialPosition, new Vector(0.0, 0.0), lgr);
+            Ball newInstance = new(initialPosition, new Vector(0.0, 0.0), logger);
             IVector curentPosition = new Vector(0.0, 0.0);
             int numberOfCallBackCalled = 0;
             newInstance.NewPositionNotification += (sender, position) =>
@@ -42,16 +42,16 @@ namespace TP.ConcurrentProgramming.Data.Test
 
         private class LoggerFix : ILogger
         {
-            public void Log(int ballId, IVector position, double velX, double velY, double mass)
+            public void Log(DateTime timestamp, int ballId, IVector position, double velX, double velY, double mass)
             {
             }
 
-            public void LogBallCollision(int ball1Id, IVector ball1Pos, double ball1VelX, double ball1VelY, double ball1Mass,
+            public void LogBallCollision(DateTime timestamp, int ball1Id, IVector ball1Pos, double ball1VelX, double ball1VelY, double ball1Mass,
                                          int ball2Id, IVector ball2Pos, double ball2VelX, double ball2VelY, double ball2Mass)
             {
             }
 
-            public void LogWallCollision(int ballId, IVector position, double velX, double velY, double mass)
+            public void LogWallCollision(DateTime timestamp, int ballId, IVector position, double velX, double velY, double mass)
             {
             }
 

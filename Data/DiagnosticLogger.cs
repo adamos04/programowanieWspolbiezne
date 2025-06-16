@@ -40,7 +40,7 @@ namespace TP.ConcurrentProgramming.Data
             string projectDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\.."));
             string logsDirectory = Path.Combine(projectDirectory, "Logs");
             Directory.CreateDirectory(logsDirectory);
-            string dateTime = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
+            string dateTime = DateTime.UtcNow.ToString("yyyy-MM-dd_HH-mm");
             _logFilePath = Path.Combine(logsDirectory, $"diagnostics_{dateTime}.json");
 
             if (File.Exists(_logFilePath))
@@ -57,12 +57,12 @@ namespace TP.ConcurrentProgramming.Data
 
             logWriter = new StreamWriter(_logFilePath, append: true, Encoding.UTF8) { AutoFlush = true };
         }
-        public void Log(int ballId, IVector position, double velX, double velY, double mass)
+        public void Log(DateTime timestamp, int ballId, IVector position, double velX, double velY, double mass)
         {
             if (_isRunning && !_disposed)
             {
                 _logBuffer.TryAdd(new LogEntry(
-                                    timestamp: DateTime.Now,
+                                    timestamp: timestamp,
                                     ballId: ballId,
                                     posX: Math.Round(position.x, 2),
                                     posY: Math.Round(position.y, 2),
@@ -72,13 +72,13 @@ namespace TP.ConcurrentProgramming.Data
             }
         }
 
-        public void LogBallCollision(int ball1Id, IVector ball1Pos, double ball1VelX, double ball1VelY, double ball1Mass,
+        public void LogBallCollision(DateTime timestamp, int ball1Id, IVector ball1Pos, double ball1VelX, double ball1VelY, double ball1Mass,
                                      int ball2Id, IVector ball2Pos, double ball2VelX, double ball2VelY, double ball2Mass)
         {
             if (_isRunning && !_disposed)
             {
                 _logBuffer.TryAdd(new BallCollisionLogEntry(
-                                    timestamp: DateTime.Now,
+                                    timestamp: timestamp,
                                     ball1Id: ball1Id,
                                     posX: Math.Round(ball1Pos.x, 2),
                                     posY: Math.Round(ball1Pos.y, 2),
@@ -94,12 +94,12 @@ namespace TP.ConcurrentProgramming.Data
             }
         }
 
-        public void LogWallCollision(int ballId, IVector position, double velX, double velY, double mass)
+        public void LogWallCollision(DateTime timestamp, int ballId, IVector position, double velX, double velY, double mass)
         {
             if (_isRunning && !_disposed)
             {
                 _logBuffer.TryAdd(new WallCollisionEntry(
-                    timestamp: DateTime.Now,
+                    timestamp: timestamp,
                     ballId: ballId,
                     posX: Math.Round(position.x, 2),
                     posY: Math.Round(position.y, 2),

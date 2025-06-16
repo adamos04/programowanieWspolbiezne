@@ -70,16 +70,16 @@ namespace TP.ConcurrentProgramming.Data.Test
 
         private class LoggerFix : ILogger
         {
-            public void Log(int ballId, IVector position, double velX, double velY, double mass)
+            public void Log(DateTime timestamp, int ballId, IVector position, double velX, double velY, double mass)
             {
             }
 
-            public void LogBallCollision(int ball1Id, IVector ball1Pos, double ball1VelX, double ball1VelY, double ball1Mass,
+            public void LogBallCollision(DateTime timestamp, int ball1Id, IVector ball1Pos, double ball1VelX, double ball1VelY, double ball1Mass,
                                          int ball2Id, IVector ball2Pos, double ball2VelX, double ball2VelY, double ball2Mass)
             {
             }
 
-            public void LogWallCollision(int ballId, IVector position, double velX, double velY, double mass)
+            public void LogWallCollision(DateTime timestamp, int ballId, IVector position, double velX, double velY, double mass)
             {
             }
 
